@@ -2,6 +2,7 @@ const zmq = require('zmq')
 const publisher = zmq.socket('pub')
 
 const { SonarGroup } = require('./parts/hc-sr04');
+const { SpeedController } = require('./parts/speed');
 
 const sonarGroup = new SonarGroup({
     triggerPin: 18,
@@ -12,20 +13,20 @@ const sonarGroup = new SonarGroup({
         echoPin: 15
     }]
 });
-
 sonarGroup.start();
 
+const speedController = new SpeedController({
+    pwmTimerPin: 22,
+    speedAxis: 0
+})
 publisher.bind('tcp://*:5555', function(err) {
-  if(err)
-    console.log(err)
-  else
-    console.log('Listening on 5563…')
+    if(err)
+        console.log(err)
+    else
+        console.log('Listening on 5555')
 });
 
 setInterval(() => {
 	const distances = sonarGroup.read();
-//	publisher.send('distance', zmq.ZMQ_SNDMORE);
-//	publisher.send(distances);
-	publisher.send(['distance', ...distances, new Date().getTime()]);
-	console.log(distances);
+	publisher.send(['distance', ...distances, speedController.getSpeed(), new Date().getTime()]);
 }, 1000);
