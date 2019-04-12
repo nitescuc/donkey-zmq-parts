@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/nitescuc/donkey-zmq-parts/issues"
   },
-  "homepage": "https://github.com/nitescuc/donkey-zmq-parts#readme"
+  "homepage": "https://github.com/nitescuc/donkey-zmq-parts#readme",
+  "dependencies": {
+    "mpu6050": "^0.1.4",
+    "pigpio": "^1.2.2",
+    "zmq": "^2.15.3"
+  }
 }

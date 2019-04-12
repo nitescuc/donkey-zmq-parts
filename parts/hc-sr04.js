@@ -19,7 +19,7 @@ class SonarReader {
         });
     }
     getDistance() {
-        return this.distance;
+        return Math.round(this.distance);
     }
 }
 
