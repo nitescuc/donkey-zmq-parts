@@ -58,7 +58,7 @@ class SpeedController {
   }
   start() {
     this.time = new Date().getTime();
-    this.stream = fs.createWriteStream(__dirname + '/' + new Date().toISOString());
+    this.stream = fs.createWriteStream(__dirname + '/../' + new Date().toISOString());
     // calibrate
     this.mpu6050.getAcceleration((err, data) => {
       this.calibrationValue = null;
