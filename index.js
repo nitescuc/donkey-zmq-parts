@@ -18,7 +18,9 @@ sonarGroup.start();
 const speedController = new SpeedController({
     pwmTimerPin: 22,
     speedAxis: 0
-})
+});
+speedController.start();
+
 publisher.bind('tcp://*:5555', function(err) {
     if(err)
         console.log(err)
