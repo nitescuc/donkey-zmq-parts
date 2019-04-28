@@ -30,5 +30,6 @@ publisher.bind('tcp://*:5555', function(err) {
 
 setInterval(() => {
 	const distances = sonarGroup.read();
-	publisher.send(['distance', ...distances, speedController.getSpeed(), new Date().getTime()]);
+    publisher.send(['distance', ...distances]);
+    publisher.send(['speed', speedController.getSpeed()]);
 }, 1000);
