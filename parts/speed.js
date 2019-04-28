@@ -28,13 +28,13 @@ class SpeedController {
     this.mpu6050.getAcceleration((err, data) => {
       if (err) return console.error('error', err);
       //
-      if (this.config.calibrationSamplesCount > this.samples.length) {
-        this.samples.push(data[this.config.speedAxis]);
+      if (this.config.calibrationSamplesCount > this.calibrationSamples.length) {
+        this.calibrationSamples.push(data[this.config.speedAxis]);
       } else {
         if (this.calibrationValue == null) {
-          this.calibrationValue = this.samples.reduce((prev, sample) => { return prev + sample }, 0)/this.samples.length;
+          this.calibrationValue = this.calibrationSamples.reduce((prev, sample) => { return prev + sample }, 0)/this.calibrationSamples.length;
+          console.log('calibration', this.calibrationValue);
         }
-        console.log('calibration', this.calibrationValue);
         this.speed = this.speed + data[this.config.speedAxis] - this.calibrationValue;
         if (this.speed < this.config.speedThreshold) {
           this.speedThresholdCount++;
