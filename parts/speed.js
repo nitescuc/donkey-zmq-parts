@@ -9,43 +9,40 @@ class SpeedController {
     this.mpu6050.initialize();
     this.mpu6050.setFullScaleAccelRange(1);
     //
-    this.config.calibrationSamplesCount = 50;
+    this.config.calibrationSamplesCount = 20;
     this.config.speedThreshold = 5000;
+    this.config.noiseThreshold = 75;
     //
     this.speed = 0;
     this.speedThresholdCount = 0;
     this.calibrationValue = null;
     this.calibrationSamples = [];
   }
+  _isNoise(s) {
+    return s > this.calibrationValue - this.config.noiseThreshold && s < this.calibrationValue + this.config.noiseThreshold;
+  }
   _addSampleGetAvg(s) {
-//    console.log('add', s);
-    this.samples.push(s);
-    if (this.samples.length > this.sampleCount) this.samples.shift();
+    if (this.calibrationValue == null) this.calibrationValue = s;
+    if (!this._isNoise(s)) {
+      this.calibrationSamples = [];
+      return this.calibrationValue;
+    }
+    this.calibrationSamples.push(s);
+    if (this.calibrationSamples.length > this.config.calibrationSamplesCount) this.calibrationSamples.shift();
     //
-    return this.samples.reduce((prev, sample, idx) => { return prev + sample * this.sampleWeights[idx] }, 0)/this.sampleTotalWeights;
+    this.calibrationValue = this.calibrationSamples.length >= this.config.calibrationSamplesCount ? 
+      this.calibrationSamples.reduce((prev, sample, idx) => { return prev + sample }, 0)/this.calibrationSamples.length : 
+      this.calibrationValue;
+    return this.calibrationValue;
   }
   _readAcceleration() {
     this.mpu6050.getAcceleration((err, data) => {
       if (err) return console.error('error', err);
       //
-      if (this.config.calibrationSamplesCount > this.calibrationSamples.length) {
-        this.calibrationSamples.push(data[this.config.speedAxis]);
-      } else {
-        if (this.calibrationValue == null) {
-          this.calibrationValue = this.calibrationSamples.reduce((prev, sample) => { return prev + sample }, 0)/this.calibrationSamples.length;
-          console.log('calibration', this.calibrationValue);
-        }
-        this.speed = this.speed + data[this.config.speedAxis] - this.calibrationValue;
-        if (this.speed < this.config.speedThreshold) {
-          this.speedThresholdCount++;
-          if (this.speedThresholdCount > this.config.calibrationSamplesCount) {
-            this.speed = 0;
-            this.speedThresholdCount = 0;
-          }
-        } else this.speedThresholdCount = 0;
-      }
+      _addSampleGetAvg(data[this.config.speedAxis]);
+      this.speed = this.speed + (!this._isNoise(s) ? s - this.calibrationValue : 0);
       //
-      if (this.stream) this.stream.write(`${new Date().getTime()};${data[0]};${data[1]};${data[2]};${this.speed}\n`);
+      if (this.stream) this.stream.write(`${new Date().getTime()}\t${data[0]}\t${data[1]}\t${data[2]}\t${this.speed}\n`.replace(/\./,','));
     });
   }
   _startAcquisition() {
