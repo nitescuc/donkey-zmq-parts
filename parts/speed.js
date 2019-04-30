@@ -9,7 +9,7 @@ class SpeedController {
     this.mpu6050.initialize();
     this.mpu6050.setFullScaleAccelRange(1);
     //
-    this.config.calibrationSamplesCount = 20;
+    this.config.calibrationSamplesCount = 80;
     this.config.speedThreshold = 5000;
     this.config.noiseThreshold = 75;
     //
@@ -39,7 +39,8 @@ class SpeedController {
     this.mpu6050.getAcceleration((err, data) => {
       if (err) return console.error('error', err);
       //
-      _addSampleGetAvg(data[this.config.speedAxis]);
+      const s = data[this.config.speedAxis];
+      this._addSampleGetAvg(s);
       this.speed = this.speed + (!this._isNoise(s) ? s - this.calibrationValue : 0);
       //
       if (this.stream) this.stream.write(`${new Date().getTime()}\t${data[0]}\t${data[1]}\t${data[2]}\t${this.speed}\n`.replace(/\./,','));
@@ -50,7 +51,7 @@ class SpeedController {
     this.pwmTimer.on('interrupt', (level, tick) => {
         this._readAcceleration();
     });
-    this.pwmTimer.pwmFrequency(100);
+    this.pwmTimer.pwmFrequency(400);
     this.pwmTimer.pwmWrite(128);
   }
   start() {
