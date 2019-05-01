@@ -6,6 +6,7 @@ const MICROSECDONDS_PER_CM = 1e6/34321;
 class SonarReader {
     constructor(config) {
         this.config = config;
+        this.config.frequency = this.config.frequency || 100;
         this.echo = new Gpio(this.config.echoPin, {mode: Gpio.INPUT, alert: true});
         this.echo.pullUpDown(Gpio.PUD_UP);
         this.echo.on('alert', (level, tick) => {
@@ -37,7 +38,7 @@ class SonarGroup {
         this.pwmTimer.on('interrupt', (level, tick) => {
             this.trigger.trigger(10, 1);
         });
-        this.pwmTimer.pwmFrequency(100);
+        this.pwmTimer.pwmFrequency(this.config.frequency);
         this.pwmTimer.pwmWrite(128);
     }
     read() {

@@ -9,6 +9,7 @@ class SpeedController {
     this.mpu6050.initialize();
     this.mpu6050.setFullScaleAccelRange(1);
     //
+    this.config.frequency = this.config.frequency || 400;
     this.config.calibrationSamplesCount = 80;
     this.config.speedThreshold = 5000;
     this.config.noiseThreshold = 75;
@@ -51,7 +52,7 @@ class SpeedController {
     this.pwmTimer.on('interrupt', (level, tick) => {
         this._readAcceleration();
     });
-    this.pwmTimer.pwmFrequency(400);
+    this.pwmTimer.pwmFrequency(this.config.frequency);
     this.pwmTimer.pwmWrite(128);
   }
   start() {
