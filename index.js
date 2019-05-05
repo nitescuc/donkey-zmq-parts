@@ -26,8 +26,9 @@ sonarGroup.start();
 
 const speedController = new SpeedController({
     pwmTimerPin: PWM_ACCEL,
-    frequency: 400,
-    speedAxis: 0
+    frequency: 1000,
+    speedAxis: 0,
+    logfile: __dirname + '/../' + new Date().toISOString()
 });
 speedController.start();
 

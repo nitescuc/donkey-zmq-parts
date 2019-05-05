@@ -10,12 +10,10 @@ class SpeedController {
     this.mpu6050.setFullScaleAccelRange(1);
     //
     this.config.frequency = this.config.frequency || 400;
-    this.config.calibrationSamplesCount = 80;
-    this.config.speedThreshold = 5000;
-    this.config.noiseThreshold = 75;
+    this.config.calibrationSamplesCount = this.config.calibrationSamplesCount || (this.config.frequency / 5);
+    this.config.noiseThreshold = this.config.noiseThreshold || 75;
     //
     this.speed = 0;
-    this.speedThresholdCount = 0;
     this.calibrationValue = null;
     this.calibrationSamples = [];
   }
@@ -57,7 +55,7 @@ class SpeedController {
   }
   start() {
     this.time = new Date().getTime();
-    this.stream = fs.createWriteStream(__dirname + '/../' + new Date().toISOString());
+    if (this.config.logfile) this.stream = fs.createWriteStream(this.config.logfile);
     // calibrate
     this.mpu6050.getAcceleration((err, data) => {
       this.calibrationValue = null;
