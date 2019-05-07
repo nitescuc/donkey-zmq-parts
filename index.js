@@ -49,7 +49,7 @@ publisher.bind('tcp://*:5555', function(err) {
         console.log('Listening on 5555')
 });
 
-setTimer(() => {
+setInterval(() => {
     publisher.send(['distance', ...(sonarGroup.read())]);
     publisher.send(['speed', speedController.getSpeed()]);
 }, 30);
