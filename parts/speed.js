@@ -11,11 +11,13 @@ class SpeedController {
     //
     this.config.frequency = this.config.frequency || 400;
     this.config.calibrationSamplesCount = this.config.calibrationSamplesCount || (this.config.frequency / 5);
-    this.config.noiseThreshold = this.config.noiseThreshold || 75;
+    this.config.noiseThreshold = this.config.noiseThreshold || 300;
     //
     this.speed = 0;
-    this.calibrationValue = null;
+    this.calibrationValue = this.config.calibrationValue;
     this.calibrationSamples = [];
+    //
+    if (this.config.logfile) this.stream = fs.createWriteStream(this.config.logfile);
   }
   _isNoise(s) {
     return s > this.calibrationValue - this.config.noiseThreshold && s < this.calibrationValue + this.config.noiseThreshold;
@@ -35,14 +37,15 @@ class SpeedController {
     return this.calibrationValue;
   }
   _readAcceleration() {
+    const tt = new Date().getTime();
     this.mpu6050.getAcceleration((err, data) => {
       if (err) return console.error('error', err);
       //
       const s = data[this.config.speedAxis];
-      this._addSampleGetAvg(s);
+      //this._addSampleGetAvg(s);
       this.speed = this.speed + (!this._isNoise(s) ? s - this.calibrationValue : 0);
       //
-      if (this.stream) this.stream.write(`${new Date().getTime()}\t${data[0]}\t${data[1]}\t${data[2]}\t${this.speed}\n`.replace(/\./,','));
+      if (this.stream) this.stream.write(`${tt}\t${data[0]}\t${data[1]}\t${data[2]}\t${this.speed}\n`.replace(/\./,','));
     });
   }
   _startAcquisition() {
@@ -55,7 +58,6 @@ class SpeedController {
   }
   start() {
     this.time = new Date().getTime();
-    if (this.config.logfile) this.stream = fs.createWriteStream(this.config.logfile);
     // calibrate
     this.mpu6050.getAcceleration((err, data) => {
       this.calibrationValue = null;

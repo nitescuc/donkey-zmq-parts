@@ -7,6 +7,7 @@ const { SpeedController } = require('./parts/speed');
 
 const PWM_SONAR = 21;
 const PWM_ACCEL = 22;
+const PWM_UPDATE = 23;
 const SONAR_TRIGGER = 18;
 const SONAR_ECHO1 = 14;
 const SONAR_ECHO2 = 15;
@@ -25,8 +26,9 @@ const sonarGroup = new SonarGroup({
 
 const speedController = new SpeedController({
     pwmTimerPin: PWM_ACCEL,
-    frequency: 1000,
+    frequency: 100,
     speedAxis: 0,
+    calibrationValue: -1417,
     logfile: __dirname + '/../' + new Date().toISOString()
 });
 //speedController.start();
