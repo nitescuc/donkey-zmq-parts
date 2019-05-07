@@ -7,7 +7,6 @@ const { SpeedController } = require('./parts/speed');
 
 const PWM_SONAR = 21;
 const PWM_ACCEL = 22;
-const PWM_PUBLISH = 23;
 const SONAR_TRIGGER = 18;
 const SONAR_ECHO1 = 14;
 const SONAR_ECHO2 = 15;
@@ -22,7 +21,7 @@ const sonarGroup = new SonarGroup({
         echoPin: SONAR_ECHO2
     }]
 });
-sonarGroup.start();
+//sonarGroup.start();
 
 const speedController = new SpeedController({
     pwmTimerPin: PWM_ACCEL,
@@ -30,7 +29,16 @@ const speedController = new SpeedController({
     speedAxis: 0,
     logfile: __dirname + '/../' + new Date().toISOString()
 });
-speedController.start();
+//speedController.start();
+
+const pwmTimer = new Gpio(PWM_UPDATE, {mode: Gpio.OUTPUT, edge: Gpio.RISING_EDGE});
+pwmTimer.on('interrupt', (level, tick) => {
+    speedController.update();
+    sonarGroup.update();
+});
+pwmTimer.pwmFrequency(100);
+pwmTimer.pwmWrite(128);
+
 
 publisher.bind('tcp://*:5555', function(err) {
     if(err)
@@ -39,11 +47,7 @@ publisher.bind('tcp://*:5555', function(err) {
         console.log('Listening on 5555')
 });
 
-const pwmTimer = new Gpio(PWM_PUBLISH, {mode: Gpio.OUTPUT, edge: Gpio.RISING_EDGE});
-pwmTimer.on('interrupt', (level, tick) => {
-	const distances = sonarGroup.read();
-    publisher.send(['distance', ...distances]);
+setTimer(() => {
+    publisher.send(['distance', ...(sonarGroup.read())]);
     publisher.send(['speed', speedController.getSpeed()]);
-});
-pwmTimer.pwmFrequency(40);
-pwmTimer.pwmWrite(128);
+}, 30);

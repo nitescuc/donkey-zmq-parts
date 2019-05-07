@@ -7,7 +7,7 @@ class SpeedController {
     this.config = config;
     this.mpu6050 = new mpu6050();
     this.mpu6050.initialize();
-    this.mpu6050.setFullScaleAccelRange(1);
+    this.mpu6050.setFullScaleAccelRange(0x00);
     //
     this.config.frequency = this.config.frequency || 400;
     this.config.calibrationSamplesCount = this.config.calibrationSamplesCount || (this.config.frequency / 5);
@@ -61,6 +61,9 @@ class SpeedController {
       this.calibrationValue = null;
       this._startAcquisition();
     });
+  }
+  update() {
+    this._readAcceleration();
   }
   getSpeed() {
     return this.speed;

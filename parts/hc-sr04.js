@@ -41,6 +41,9 @@ class SonarGroup {
         this.pwmTimer.pwmFrequency(this.config.frequency);
         this.pwmTimer.pwmWrite(128);
     }
+    update() {
+        this.trigger.trigger(10, 1);
+    }
     read() {
         return this.sonars.map(sonar => sonar.getDistance());
     }
