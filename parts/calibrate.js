@@ -8,10 +8,10 @@ const pSetTimeout = async (timeout) => {
 
 const MPU6050_RA_XA_OFFS_H = 0x06;
 
-mpu6050.prototype.setXAccelOffset = function(offset) {
+mpu6050.prototype.setXAccelOffset = function(offset, cb) {
     const buf = Buffer.allocUnsafe(2);
     buf.writeUInt16BE(offset);
-    this.i2cdev.writeBytes(MPU6050_RA_XA_OFFS_H, [...buf]);    
+    this.i2cdev.writeBytes(MPU6050_RA_XA_OFFS_H, [...buf], cb);    
 }
 class Calibrate {
     constructor() {
@@ -29,6 +29,15 @@ class Calibrate {
             });
         });
     }
+    async setXAccelOffset(offset) {
+        return new Promise((resolve, reject) => {
+            this.mpu6050.setXAccelOffset(offset, (err, data) => {
+                if (err) return reject(err);
+                //
+                resolve(data);
+            });
+        });
+    }
     async meanSensors(samples) {
         let total = 0;
         for (let i = 0; i < samples; i++) {
@@ -38,7 +47,7 @@ class Calibrate {
         return total;
     }
     async calibrate() {
-        this.mpu6050.setXAccelOffset(0);
+        await this.setXAccelOffset(0);
         // let go 100 samples
         await this.meanSensors(100);
         // read 1000 samples
@@ -49,7 +58,7 @@ class Calibrate {
         while (loops--) {
             console.log('Setting offset', ax_offset);
             //
-            this.mpu6050.setXAccelOffset(ax_offset);
+            await this.mpu6050.setXAccelOffset(ax_offset);
             mean_ax = await this.meanSensors(this.bufferSize);
             //
             if (abs(mean_ax) <= this.accelDeathZone) break;
