@@ -44,7 +44,7 @@ class Calibrate {
             total += (await readAcceleration())[0];
             await pSetTimeout(1);
         }
-        return total;
+        return total / samples;
     }
     async calibrate() {
         await this.setXAccelOffset(0);
