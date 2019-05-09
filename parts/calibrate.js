@@ -41,7 +41,7 @@ class Calibrate {
     async meanSensors(samples) {
         let total = 0;
         for (let i = 0; i < samples; i++) {
-            total += (await readAcceleration())[0];
+            total += (await this.readAcceleration())[0];
             await pSetTimeout(1);
         }
         return total / samples;
@@ -54,15 +54,15 @@ class Calibrate {
         let mean_ax = await this.meanSensors(this.bufferSize);
         // 
         let loops = 100;
-        let ax_offset = -mean_ax/this.accelDeathZone;
+        let ax_offset = -Math.round(mean_ax/this.accelDeathZone);
         while (loops--) {
             console.log('Setting offset', ax_offset);
             //
-            await this.mpu6050.setXAccelOffset(ax_offset);
+            await this.setXAccelOffset(ax_offset);
             mean_ax = await this.meanSensors(this.bufferSize);
             //
-            if (abs(mean_ax) <= this.accelDeathZone) break;
-            else ax_offset = ax_offset - mean_ax / this.accelDeathZone;
+            if (Math.abs(mean_ax) <= this.accelDeathZone) break;
+            else ax_offset = Math.round(ax_offset - mean_ax / this.accelDeathZone);
         }
         return ax_offset;
     }

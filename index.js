@@ -25,20 +25,19 @@ const sonarGroup = new SonarGroup({
 //sonarGroup.start();
 
 const speedController = new SpeedController({
-    pwmTimerPin: PWM_ACCEL,
-    frequency: 100,
     speedAxis: 0,
-    calibrationValue: -1417,
+    offsetX: 147,
+    noiseThreshold: 150,
     logfile: __dirname + '/../' + new Date().toISOString()
 });
-//speedController.start();
+speedController.start();
 
 const pwmTimer = new Gpio(PWM_UPDATE, {mode: Gpio.OUTPUT, edge: Gpio.RISING_EDGE});
 pwmTimer.on('interrupt', (level, tick) => {
-    speedController.update();
+//    speedController.update();
     sonarGroup.update();
 });
-pwmTimer.pwmFrequency(100);
+pwmTimer.pwmFrequency(50);
 pwmTimer.pwmWrite(128);
 
 
