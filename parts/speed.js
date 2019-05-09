@@ -1,5 +1,5 @@
 const Gpio = require('pigpio').Gpio;
-const mpu6050 = require('./mpu6050');
+const mpu6050 = require('mpu6050');
 const fs = require('fs');
 
 const MPU6050_RA_XA_OFFS_H = 0x06;
