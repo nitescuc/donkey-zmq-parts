@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/nitescuc/donkey-zmq-parts#readme",
   "dependencies": {
+    "kalmanjs": "^1.1.0",
     "mpu6050": "^0.1.4",
     "pigpio": "^1.2.2",
+    "rccar-remote-reader": "git+https://github.com/nitescuc/rccar-remote-reader.git",
     "zmq": "^2.15.3"
   }
 }

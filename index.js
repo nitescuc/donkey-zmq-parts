@@ -1,7 +1,38 @@
 const zmq = require('zmq')
 const publisher = zmq.socket('pub')
 const Gpio = require('pigpio').Gpio;
+const { RemoteChannel, RemoteSwitchChannel } = require('rccar-remote-reader');
 
+const STEERING_PIN = 21;
+const THROTTLE_PIN = 22;
+const MODE_PIN = 23;
+
+publisher.bind('tcp://*:5555', function(err) {
+    if(err)
+        console.log(err)
+    else
+        console.log('Listening on 5555')
+});
+
+const steering = new RemoteChannel({
+    pin: STEERING_PIN,
+    remapValues: [-1, 1],
+    sensitivity: 0.05,
+    callback: (value) => publisher.send(['steering', value])
+});
+const throttle = new RemoteChannel({
+    pin: THROTTLE_PIN,
+    remapValues: [-1, 1],
+    sensitivity: 0.05,
+    callback: (value) => publisher.send(['throttle', value])
+});
+const mode = new RemoteSwitchChannel({
+    pin: MODE_PIN,
+    remapValues: [false, true],
+    callback: (value) => publisher.send(['mode', value])
+});
+
+/*
 const { SonarGroup } = require('./parts/hc-sr04');
 const { SpeedController } = require('./parts/speed');
 
@@ -41,14 +72,9 @@ pwmTimer.pwmFrequency(50);
 pwmTimer.pwmWrite(128);
 
 
-publisher.bind('tcp://*:5555', function(err) {
-    if(err)
-        console.log(err)
-    else
-        console.log('Listening on 5555')
-});
-
 setInterval(() => {
     publisher.send(['distance', ...(sonarGroup.read())]);
     publisher.send(['speed', speedController.getSpeed()]);
 }, 30);
+
+*/
