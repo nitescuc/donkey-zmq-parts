@@ -3,9 +3,9 @@ const publisher = zmq.socket('pub')
 const Gpio = require('pigpio').Gpio;
 const { RemoteChannel, RemoteSwitchChannel } = require('rccar-remote-reader');
 
-const STEERING_PIN = 21;
-const THROTTLE_PIN = 22;
-const MODE_PIN = 23;
+const STEERING_PIN = 17;
+const THROTTLE_PIN = 27;
+const MODE_PIN = 22;
 
 publisher.bind('tcp://*:5555', function(err) {
     if(err)
