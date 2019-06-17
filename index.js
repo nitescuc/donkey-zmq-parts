@@ -18,18 +18,18 @@ const steering = new RemoteChannel({
     pin: STEERING_PIN,
     remapValues: [-1, 1],
     sensitivity: 0.05,
-    callback: (value) => publisher.send(['steering', value])
+    callback: (channel, value) => publisher.send(['remote_steering', value])
 });
 const throttle = new RemoteChannel({
     pin: THROTTLE_PIN,
     remapValues: [-1, 1],
     sensitivity: 0.05,
-    callback: (value) => publisher.send(['throttle', value])
+    callback: (channel, value) => publisher.send(['remote_throttle', value])
 });
 const mode = new RemoteSwitchChannel({
     pin: MODE_PIN,
     remapValues: [false, true],
-    callback: (value) => publisher.send(['mode', value])
+    callback: (channel, value) => publisher.send(['remote_mode', value])
 });
 
 /*
