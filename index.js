@@ -1,11 +1,21 @@
 const zmq = require('zmq')
 const publisher = zmq.socket('pub')
 const Gpio = require('pigpio').Gpio;
-const { RemoteChannel, RemoteSwitchChannel } = require('rccar-remote-reader');
+const { RemoteChannel, RemoteSwitchChannel } = require('@nitescuc/rccar-remote-reader');
+const { Actuator } = require('@nitescuc/rccar-actuator');
 
-const STEERING_PIN = 17;
-const THROTTLE_PIN = 27;
-const MODE_PIN = 22;
+const REMOTE_STEERING_PIN = 17;
+const REMOTE_THROTTLE_PIN = 27;
+const REMOTE_MODE_PIN = 22;
+
+const ACTUATOR_STEERING = 24;
+const ACTUATOR_THROTTLE = 23;
+
+const LED_RED = 16;
+const LED_GREEN = 20;
+const LED_BLUE = 21;
+
+let mode = 'user';
 
 publisher.bind('tcp://*:5555', function(err) {
     if(err)
@@ -14,22 +24,40 @@ publisher.bind('tcp://*:5555', function(err) {
         console.log('Listening on 5555')
 });
 
-const steering = new RemoteChannel({
-    pin: STEERING_PIN,
+const actuatorSteering = new Actuator({
+    pin: ACTUATOR_STEERING,
+    remapValues: [1000, 1500]
+});
+const actuatorThrottle = new Actuator({
+    pin: ACTUATOR_THROTTLE,
+    remapValues: [1200, 1850]
+});
+
+const remoteSteering = new RemoteChannel({
+    pin: REMOTE_STEERING_PIN,
     remapValues: [-1, 1],
     sensitivity: 0.05,
-    callback: (channel, value) => publisher.send(['remote_steering', value])
+    callback: (channel, value) => {
+        if (mode === 'user') actuatorSteering.setValue(value);
+        publisher.send(['remote_steering', value]);
+    }
 });
-const throttle = new RemoteChannel({
-    pin: THROTTLE_PIN,
+const remoteThrottle = new RemoteChannel({
+    pin: REMOTE_THROTTLE_PIN,
     remapValues: [-1, 1],
     sensitivity: 0.05,
-    callback: (channel, value) => publisher.send(['remote_throttle', value])
+    callback: (channel, value) => {
+        if (mode !== 'user') actuatorThrottle.setValue(value);
+        publisher.send(['remote_throttle', value]);
+    }
 });
-const mode = new RemoteSwitchChannel({
-    pin: MODE_PIN,
+const remoteMode = new RemoteSwitchChannel({
+    pin: REMOTE_MODE_PIN,
     remapValues: [false, true],
-    callback: (channel, value) => publisher.send(['remote_mode', value])
+    callback: (channel, value) => {
+        if (mode !== 'user') mode = value ? 'local' : 'local_angle';  
+        publisher.send(['remote_mode', value]);
+    }
 });
 
 /*
