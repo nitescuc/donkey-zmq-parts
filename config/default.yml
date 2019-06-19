@@ -1,0 +1,2 @@
+actuator:
+  emitter: localhost:5555

@@ -1,8 +1,11 @@
-const zmq = require('zmq')
-const publisher = zmq.socket('pub')
+const zmq = require('zmq');
+const publisher = zmq.socket('pub');
+const receiver = zmq.socket('sub');
 const Gpio = require('pigpio').Gpio;
 const { RemoteChannel, RemoteSwitchChannel } = require('@nitescuc/rccar-remote-reader');
 const { Actuator } = require('@nitescuc/rccar-actuator');
+const { Config } = require('./src/config');
+const { LedDisplay } = require('./src/led');
 
 const REMOTE_STEERING_PIN = 17;
 const REMOTE_THROTTLE_PIN = 27;
@@ -15,6 +18,8 @@ const LED_RED = 16;
 const LED_GREEN = 20;
 const LED_BLUE = 21;
 
+const config = Config.getConfig();
+
 let mode = 'user';
 
 publisher.bind('tcp://*:5555', function(err) {
@@ -22,6 +27,12 @@ publisher.bind('tcp://*:5555', function(err) {
         console.log(err)
     else
         console.log('Listening on 5555')
+});
+
+const ledDisplay = new LedDisplay({
+    redPin: LED_RED,
+    greenPin: LED_GREEN,
+    bluePin: LED_BLUE
 });
 
 const actuatorSteering = new Actuator({
@@ -33,13 +44,31 @@ const actuatorThrottle = new Actuator({
     remapValues: [1200, 1850]
 });
 
+const setSteering = (value, withSend) => {
+    if (mode === 'user') {
+        actuatorSteering.setValue(value);
+        if (withSend) publisher.send(['remote_steering', value]);
+    }
+}
+const setThrottle = (value, withSend) => {
+    if (mode !== 'local') {
+        actuatorThrottle.setValue(value);
+        if (withSend) publisher.send(['remote_throttle', value]);
+    }
+    ledDisplay.update(mode, value);
+}
+const setMode = (value) => {
+    if ((value === 'local_angle' || value === 'local') && mode === 'user') mode = 'local_angle';
+    if (mode !== 'user' && value === 'user') mode = 'user';
+    ledDisplay.update(mode, actuatorThrottle.getValue());
+}
+
 const remoteSteering = new RemoteChannel({
     pin: REMOTE_STEERING_PIN,
     remapValues: [-1, 1],
     sensitivity: 0.02,
     callback: (channel, value) => {
-        if (mode === 'user') actuatorSteering.setValue(value);
-        publisher.send(['remote_steering', value]);
+        setSteering(value, true);
     }
 });
 const remoteThrottle = new RemoteChannel({
@@ -47,8 +76,7 @@ const remoteThrottle = new RemoteChannel({
     remapValues: [-1, 1],
     sensitivity: 0.02,
     callback: (channel, value) => {
-        if (mode !== 'local') actuatorThrottle.setValue(value);
-        publisher.send(['remote_throttle', value]);
+        setThrottle(value, true);
     }
 });
 const remoteMode = new RemoteSwitchChannel({
@@ -59,6 +87,17 @@ const remoteMode = new RemoteSwitchChannel({
         publisher.send(['remote_mode', value]);
     }
 });
+
+// receiver
+receiver.connect(config.get('actuator.emitter'));
+receiver.subscribe('actuator');
+receiver.on('message', (topic, message) => {
+    console.log('received a message related to:', topic, 'containing message:', message);
+    setSteering(message[0]);
+    setThrottle(message[1]);
+    setMode(message[2]);
+});
+
 
 /*
 const { SonarGroup } = require('./parts/hc-sr04');
