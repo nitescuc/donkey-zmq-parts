@@ -26,7 +26,7 @@ publisher.bind('tcp://*:5555', function(err) {
 
 const actuatorSteering = new Actuator({
     pin: ACTUATOR_STEERING,
-    remapValues: [1000, 1500]
+    remapValues: [1000, 2000]
 });
 const actuatorThrottle = new Actuator({
     pin: ACTUATOR_THROTTLE,
@@ -36,7 +36,7 @@ const actuatorThrottle = new Actuator({
 const remoteSteering = new RemoteChannel({
     pin: REMOTE_STEERING_PIN,
     remapValues: [-1, 1],
-    sensitivity: 0.05,
+    sensitivity: 0.02,
     callback: (channel, value) => {
         if (mode === 'user') actuatorSteering.setValue(value);
         publisher.send(['remote_steering', value]);
@@ -45,9 +45,9 @@ const remoteSteering = new RemoteChannel({
 const remoteThrottle = new RemoteChannel({
     pin: REMOTE_THROTTLE_PIN,
     remapValues: [-1, 1],
-    sensitivity: 0.05,
+    sensitivity: 0.02,
     callback: (channel, value) => {
-        if (mode !== 'user') actuatorThrottle.setValue(value);
+        if (mode !== 'local') actuatorThrottle.setValue(value);
         publisher.send(['remote_throttle', value]);
     }
 });
