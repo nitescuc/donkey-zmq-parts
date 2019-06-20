@@ -15,8 +15,8 @@ const ACTUATOR_STEERING = 24;
 const ACTUATOR_THROTTLE = 23;
 
 const LED_RED = 16;
-const LED_GREEN = 20;
-const LED_BLUE = 21;
+const LED_GREEN = 21;
+const LED_BLUE = 20;
 
 const config = Config.getConfig();
 
@@ -60,6 +60,7 @@ const setThrottle = (value, withSend) => {
 const setMode = (value) => {
     if ((value === 'local_angle' || value === 'local') && mode === 'user') mode = 'local_angle';
     if (mode !== 'user' && value === 'user') mode = 'user';
+    console.log('new mode', value, 'mode now', mode);
     ledDisplay.update(mode, actuatorThrottle.getValue());
 }
 
@@ -91,11 +92,10 @@ const remoteMode = new RemoteSwitchChannel({
 // receiver
 receiver.connect(config.get('actuator.emitter'));
 receiver.subscribe('actuator');
-receiver.on('message', (topic, message) => {
-    console.log('received a message related to:', topic, 'containing message:', message);
-    setSteering(message[0]);
-    setThrottle(message[1]);
-    setMode(message[2]);
+receiver.on('message', (topic, steering, throttle, mode) => {
+    setSteering(parseFloat(steering.toString()));
+    setThrottle(parseFloat(throttle.toString()));
+    setMode(mode.toString());
 });
 
 
