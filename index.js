@@ -58,6 +58,8 @@ const setThrottle = (value, withSend) => {
     ledDisplay.update(mode, value);
 }
 const setMode = (value) => {
+    if (value === mode) return;
+    
     if ((value === 'local_angle' || value === 'local') && mode === 'user') mode = 'local_angle';
     if (mode !== 'user' && value === 'user') mode = 'user';
     console.log('new mode', value, 'mode now', mode);
