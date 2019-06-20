@@ -58,12 +58,14 @@ const setThrottle = (value, withSend) => {
     ledDisplay.update(mode, value);
 }
 const setMode = (value) => {
-    if (value === mode) return;
-    
-    if ((value === 'local_angle' || value === 'local') && mode === 'user') mode = 'local_angle';
-    if (mode !== 'user' && value === 'user') mode = 'user';
-    console.log('new mode', value, 'mode now', mode);
-    ledDisplay.update(mode, actuatorThrottle.getValue());
+    if ((value === 'local_angle' || value === 'local') && mode === 'user') {
+        mode = 'local_angle';
+        ledDisplay.update(mode, actuatorThrottle.getValue());
+    }
+    if (mode !== 'user' && value === 'user') {
+        mode = 'user';
+        ledDisplay.update(mode, actuatorThrottle.getValue());
+    }
 }
 
 const remoteSteering = new RemoteChannel({
@@ -86,7 +88,8 @@ const remoteMode = new RemoteSwitchChannel({
     pin: REMOTE_MODE_PIN,
     remapValues: [false, true],
     callback: (channel, value) => {
-        if (mode !== 'user') mode = value ? 'local' : 'local_angle';  
+        if (mode !== 'user') mode = value ? 'local' : 'local_angle';
+        ledDisplay.update(mode, actuatorThrottle.getValue());
         publisher.send(['remote_mode', value]);
     }
 });
