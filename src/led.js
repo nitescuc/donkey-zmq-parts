@@ -24,9 +24,13 @@ class LedDisplay {
         }
         this.allOff();
         if (Math.abs(throttle) > 0.2) {
-            this.blinkTimer = setInterval(() => { out.digitalWrite(1 - out.digitalRead()) }, 1000);
+            if (!this.blinkTimer) 
+                this.blinkTimer = setInterval(() => { out.digitalWrite(1 - out.digitalRead()) }, 1000);
         } else {
-            this.blinkTimer && clearInterval(this.blinkTimer);
+            if (this.blinkTimer) {
+                clearInterval(this.blinkTimer);
+                this.blinkTimer = null;
+            }
             out.digitalWrite(1);
         }
     }
