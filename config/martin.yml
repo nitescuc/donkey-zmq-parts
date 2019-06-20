@@ -1,2 +1,2 @@
 actuator:
-  emitter: 10.42.0.1:5555
+  emitter: tcp://10.42.0.1:5555
