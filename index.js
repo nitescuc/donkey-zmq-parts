@@ -88,14 +88,21 @@ const remoteThrottle = new RemoteChannel({
     remapValues: [-1, 1],
     sensitivity: 0.02,
     callback: (channel, value) => {
-        setThrottleFromRemote(value, true);
+        setThrottleFromRemote(value);
     }
 });
 const remoteMode = new RemoteSwitchChannel({
     pin: REMOTE_MODE_PIN,
     remapValues: [false, true],
     callback: (channel, value) => {
-        if (mode !== 'user') mode = value ? 'local' : 'local_angle';
+        if (mode !== 'user') {
+            if (value) {
+                mode = 'local';
+            } else {
+                setThrottleFromRemote(0);
+                mode = 'local_angle';
+            }
+        }
         publisher.send(['remote_mode', value]);
     }
 });
