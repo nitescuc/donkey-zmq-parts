@@ -14,12 +14,18 @@ class LedDisplay {
         switch(mode) {
             case 'user': 
                 out = this.greenGpio;
+                this.blueGpio.digitalWrite(0);
+                this.redGpio.digitalWrite(0);
                 break;
             case 'local_angle': 
                 out = this.blueGpio;
+                this.greenGpio.digitalWrite(0);
+                this.redGpio.digitalWrite(0);
                 break;
             case 'local':
                 out = this.redGpio;
+                this.blueGpio.digitalWrite(0);
+                this.greenGpio.digitalWrite(0);
                 break;
         }
         this.allOff();
