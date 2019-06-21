@@ -109,6 +109,7 @@ receiver.on('message', (topic, steering, throttle, mode) => {
     setMode(mode.toString());
 });
 
-setInterval(() => {
+const updateLed = () => {
     ledDisplay.update(mode, actuatorThrottle.getValue());
-}, 1000);
+}
+setInterval(updateLed, 1000);

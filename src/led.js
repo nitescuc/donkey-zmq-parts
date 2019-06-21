@@ -22,18 +22,10 @@ class LedDisplay {
                 out = this.redGpio;
                 break;
         }
+        this.allOff();
         if (Math.abs(throttle) > 0.2) {
-            if (!this.blinkTimer) 
-                this.blinkTimer = setInterval(() => {
-                    this.allOff();
-                    out.digitalWrite(1 - out.digitalRead()) 
-                }, 1000);
+            out.digitalWrite(1 - out.digitalRead());
         } else {
-            if (this.blinkTimer) {
-                clearInterval(this.blinkTimer);
-                this.blinkTimer = null;
-            }
-            this.allOff();
             out.digitalWrite(1);
         }
     }
