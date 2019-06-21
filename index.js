@@ -99,8 +99,8 @@ const remoteMode = new RemoteSwitchChannel({
             if (value) {
                 mode = 'local';
             } else {
-                setThrottleFromRemote(0);
                 mode = 'local_angle';
+                setThrottleFromRemote(0);
             }
         }
         publisher.send(['remote_mode', value]);
