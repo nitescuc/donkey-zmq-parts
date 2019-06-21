@@ -28,7 +28,6 @@ class LedDisplay {
                 this.greenGpio.digitalWrite(0);
                 break;
         }
-        this.allOff();
         if (Math.abs(throttle) > 0.2) {
             out.digitalWrite(1 - out.digitalRead());
         } else {
