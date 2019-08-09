@@ -4,6 +4,7 @@ const receiver = zmq.socket('sub');
 const Gpio = require('pigpio').Gpio;
 const { RemoteChannel, RemoteSwitchChannel } = require('@nitescuc/rccar-remote-reader');
 const { Actuator } = require('@nitescuc/rccar-actuator');
+const { RpmReader } = require('@nitescuc/brushless-rpm');
 const { Config } = require('./src/config');
 const { LedDisplay } = require('./src/led');
 
@@ -13,6 +14,9 @@ const REMOTE_MODE_PIN = 22;
 
 const ACTUATOR_STEERING = 24;
 const ACTUATOR_THROTTLE = 23;
+
+const RPM_POWER_PIN = 26;
+const RPM_DATA_PIN = 19;
 
 const LED_RED = 16;
 const LED_GREEN = 21;
@@ -114,6 +118,14 @@ receiver.on('message', (topic, steering, throttle, mode) => {
     setSteeringFromZmq(parseFloat(steering.toString()));
     setThrottleFromZmq(parseFloat(throttle.toString()));
     setMode(mode.toString());
+});
+
+const rpmReader = new RpmReader({
+    pin: RPM_DATA_PIN,
+    powerPin: RPM_POWER_PIN,
+    callback: (channel, value) => {
+        publisher.send(['rpm', value]);
+    }
 });
 
 const updateLed = () => {
