@@ -1,2 +1,4 @@
 actuator:
   emitter: tcp://10.42.0.1:5555
+configServer:
+  emitter: tcp://10.42.0.1:5556

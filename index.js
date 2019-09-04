@@ -128,6 +128,8 @@ const rpmReader = new RpmReader({
     }
 });
 
+config.on('max_pulse', value => actuatorThrottle.setMaxRemapValue(value));
+
 const updateLed = () => {
     ledDisplay.update(mode, actuatorThrottle.getValue());
 }
