@@ -7,6 +7,7 @@ let conf;
 
 class Config extends EventEmitter {
     constructor() {
+        super();
         this.overrides = {};
         receiver.connect(config.get('configServer.emitter'));
         receiver.subscribe('config');
