@@ -1,4 +1,4 @@
 actuator:
-  emitter: localhost:5555
+  emitter: tcp://127.0.0.1:5555
 configServer:
-  emitter: localhost:5556
+  emitter: tcp://127.0.0.1:5556
