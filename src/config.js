@@ -1,4 +1,5 @@
 const config = require('config');
+const EventEmitter = require('events');
 const zmq = require('zmq');
 const receiver = zmq.socket('sub');
 
