@@ -45,7 +45,7 @@ const actuatorSteering = new Actuator({
 });
 const actuatorThrottle = new Actuator({
     pin: ACTUATOR_THROTTLE,
-    remapValues: [1200, 1850]
+    remapValues: [config.get('actuator.min_pulse'), config.get('actuator.max_pulse')]
 });
 
 const setSteeringFromRemote = (value) => {
@@ -120,13 +120,13 @@ receiver.on('message', (topic, steering, throttle, mode) => {
     setMode(mode.toString());
 });
 
-const rpmReader = new RpmReader({
+/*const rpmReader = new RpmReader({
     pin: RPM_DATA_PIN,
     powerPin: RPM_POWER_PIN,
     callback: (channel, value) => {
         publisher.send(['rpm', value]);
     }
-});
+});*/
 
 config.on('max_pulse', value => actuatorThrottle.setMaxRemapValue(value));
 

@@ -25,7 +25,9 @@ class Config extends EventEmitter {
         return conf;
     }
     get(key) {
-        return this.overrides[key] || config.get(key);
+        const value = this.overrides[key] || config.get(key);
+        console.log(`Config.get key "${key}" value "${value}`);
+        return value;
     }
     set(key, value) {
         this.overrides[key] = value;
