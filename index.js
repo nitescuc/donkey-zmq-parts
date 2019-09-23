@@ -7,6 +7,7 @@ const { Actuator } = require('@nitescuc/rccar-actuator');
 const { RpmReader } = require('@nitescuc/brushless-rpm');
 const { Config } = require('./src/config');
 const { LedDisplay } = require('./src/led');
+const dgram = require('dgram');
 
 const REMOTE_STEERING_PIN = 17;
 const REMOTE_THROTTLE_PIN = 27;
@@ -111,14 +112,34 @@ const remoteMode = new RemoteSwitchChannel({
     }
 });
 
+
+const actuatorServer = dgram.createSocket('udp4');
+actuatorServer.on('listening', () => {
+    const address = actuatorServer.address();
+    console.log(`actuatorServer listening ${address.address}:${address.port}`);
+});
+actuatorServer.on('error', (err) => {
+    console.log(`actuatorServer error:\n${err.stack}`);
+    actuatorServer.close();
+});
+actuatorServer.on('message', (msg, rinfo) => {
+    //console.log(`actuatorServer got: ${msg} from ${rinfo.address}:${rinfo.port}`);
+    const parts = msq.toString().split(';');
+    parts[0] && setSteeringFromZmq(parseFloat(parts[0]));
+    parts[1] && setThrottleFromZmq(parseFloat(parts[1]));
+    parts[2] && setMode(parts[2]);
+});
+actuatorServer.bind(5001);
+
 // receiver
-receiver.connect(config.get('actuator.emitter'));
+/*receiver.connect(config.get('actuator.emitter'));
 receiver.subscribe('actuator');
 receiver.on('message', (topic, steering, throttle, mode) => {
     setSteeringFromZmq(parseFloat(steering.toString()));
     setThrottleFromZmq(parseFloat(throttle.toString()));
     setMode(mode.toString());
 });
+*/
 
 /*const rpmReader = new RpmReader({
     pin: RPM_DATA_PIN,
