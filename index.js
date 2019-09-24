@@ -1,6 +1,5 @@
-const zmq = require('zmq');
-const publisher = zmq.socket('pub');
-const receiver = zmq.socket('sub');
+//const zmq = require('zmq');
+//const publisher = zmq.socket('pub');
 const Gpio = require('pigpio').Gpio;
 const { RemoteChannel, RemoteSwitchChannel } = require('@nitescuc/rccar-remote-reader');
 const { Actuator } = require('@nitescuc/rccar-actuator');
@@ -27,13 +26,15 @@ const config = Config.getConfig();
 
 let mode = 'user';
 
-publisher.bind('tcp://*:5555', function(err) {
+const remoteSocket = dgram.createSocket('udp4');
+
+/*publisher.bind('tcp://*:5555', function(err) {
     if(err)
         console.log(err)
     else
         console.log('Listening on 5555')
 });
-
+*/
 const ledDisplay = new LedDisplay({
     redPin: LED_RED,
     greenPin: LED_GREEN,
@@ -52,7 +53,8 @@ const actuatorThrottle = new Actuator({
 const setSteeringFromRemote = (value) => {
     if (mode === 'user') {
         actuatorSteering.setValue(value);
-        publisher.send(['remote_steering', value]);
+        //publisher.send(['remote_steering', value]);
+        remoteSocket.send(`st;${parseFloat(value).toFixed(4)}`, config.get('remote.server_port'), config.get('remote.server_address'), err => console.error(err));
     }
 }
 const setSteeringFromZmq = (value) => {
@@ -63,7 +65,8 @@ const setSteeringFromZmq = (value) => {
 const setThrottleFromRemote = (value) => {
     if (mode !== 'local') {
         actuatorThrottle.setValue(value);
-        publisher.send(['remote_throttle', value]);
+//        publisher.send(['remote_throttle', value]);
+        remoteSocket.send(`th;${parseFloat(value).toFixed(4)}`, config.get('remote.server_port'), config.get('remote.server_address'), err => console.error(err));
     }
 }
 const setThrottleFromZmq = (value) => {
@@ -108,7 +111,8 @@ const remoteMode = new RemoteSwitchChannel({
                 setThrottleFromRemote(0);
             }
         }
-        publisher.send(['remote_mode', value]);
+        //publisher.send(['remote_mode', value]);
+        remoteSocket.send(`md;${mode}`, config.get('remote.server_port'), config.get('remote.server_address'), err => console.error(err));        
     }
 });
 
@@ -123,23 +127,12 @@ actuatorServer.on('error', (err) => {
     actuatorServer.close();
 });
 actuatorServer.on('message', (msg, rinfo) => {
-    //console.log(`actuatorServer got: ${msg} from ${rinfo.address}:${rinfo.port}`);
     const parts = msg.toString().split(';');
     parts[0] && setSteeringFromZmq(parseFloat(parts[0]));
     parts[1] && setThrottleFromZmq(parseFloat(parts[1]));
     parts[2] && setMode(parts[2]);
 });
-actuatorServer.bind(5001);
-
-// receiver
-/*receiver.connect(config.get('actuator.emitter'));
-receiver.subscribe('actuator');
-receiver.on('message', (topic, steering, throttle, mode) => {
-    setSteeringFromZmq(parseFloat(steering.toString()));
-    setThrottleFromZmq(parseFloat(throttle.toString()));
-    setMode(mode.toString());
-});
-*/
+actuatorServer.bind(config.get('actuator.server_port'));
 
 /*const rpmReader = new RpmReader({
     pin: RPM_DATA_PIN,

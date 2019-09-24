@@ -4,3 +4,6 @@ actuator:
   min_pulse: 1200
 configServer:
   emitter: tcp://10.42.0.1:5556
+remote:
+  server_port: 5001
+  server_address: "10.42.0.1"
