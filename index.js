@@ -124,7 +124,7 @@ actuatorServer.on('error', (err) => {
 });
 actuatorServer.on('message', (msg, rinfo) => {
     //console.log(`actuatorServer got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-    const parts = msq.toString().split(';');
+    const parts = msg.toString().split(';');
     parts[0] && setSteeringFromZmq(parseFloat(parts[0]));
     parts[1] && setThrottleFromZmq(parseFloat(parts[1]));
     parts[2] && setMode(parts[2]);
