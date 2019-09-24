@@ -1,6 +1,6 @@
 actuator:
   emitter: tcp://10.42.0.1:5555
-  max_pulse: 1800
+  max_pulse: 1650
   min_pulse: 1200
 configServer:
   emitter: tcp://10.42.0.1:5556
