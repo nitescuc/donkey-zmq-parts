@@ -1,5 +1,3 @@
-//const zmq = require('zmq');
-//const publisher = zmq.socket('pub');
 const Gpio = require('pigpio').Gpio;
 const { RemoteChannel, RemoteSwitchChannel } = require('@nitescuc/rccar-remote-reader');
 const { Actuator } = require('@nitescuc/rccar-actuator');
@@ -30,13 +28,6 @@ const remoteSocket = dgram.createSocket('udp4');
 const remote_server_port = config.get('remote.server_port');
 const remote_server_addr = config.get('remote.server_address');
 
-/*publisher.bind('tcp://*:5555', function(err) {
-    if(err)
-        console.log(err)
-    else
-        console.log('Listening on 5555')
-});
-*/
 const ledDisplay = new LedDisplay({
     redPin: LED_RED,
     greenPin: LED_GREEN,
@@ -55,7 +46,6 @@ const actuatorThrottle = new Actuator({
 const setSteeringFromRemote = (value) => {
     if (mode === 'user') {
         actuatorSteering.setValue(value);
-        //publisher.send(['remote_steering', value]);
         remoteSocket.send(`st;${parseFloat(value).toFixed(8)}`, remote_server_port, remote_server_addr, err => {
             if(err) console.error(err);
         });
@@ -69,7 +59,6 @@ const setSteeringFromZmq = (value) => {
 const setThrottleFromRemote = (value) => {
     if (mode !== 'local') {
         actuatorThrottle.setValue(value);
-//        publisher.send(['remote_throttle', value]);
         remoteSocket.send(`th;${parseFloat(value).toFixed(8)}`, remote_server_port, remote_server_addr, err => {
             if (err) console.error(err);
         });
@@ -117,7 +106,6 @@ const remoteMode = new RemoteSwitchChannel({
                 setThrottleFromRemote(0);
             }
         }
-        //publisher.send(['remote_mode', value]);
         remoteSocket.send(`md;${mode}`, remote_server_port, remote_server_addr, err => {
             if (err) console.error(err);
         });        
