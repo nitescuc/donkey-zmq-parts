@@ -56,7 +56,7 @@ const setSteeringFromRemote = (value) => {
     if (mode === 'user') {
         actuatorSteering.setValue(value);
         //publisher.send(['remote_steering', value]);
-        remoteSocket.send(`st;${parseFloat(value).toFixed(4)}`, remote_server_port, remote_server_addr, err => {
+        remoteSocket.send(`st;${parseFloat(value).toFixed(8)}`, remote_server_port, remote_server_addr, err => {
             if(err) console.error(err);
         });
     }
@@ -70,7 +70,7 @@ const setThrottleFromRemote = (value) => {
     if (mode !== 'local') {
         actuatorThrottle.setValue(value);
 //        publisher.send(['remote_throttle', value]);
-        remoteSocket.send(`th;${parseFloat(value).toFixed(4)}`, remote_server_port, remote_server_addr, err => {
+        remoteSocket.send(`th;${parseFloat(value).toFixed(8)}`, remote_server_port, remote_server_addr, err => {
             if (err) console.error(err);
         });
     }
