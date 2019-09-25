@@ -27,6 +27,8 @@ const config = Config.getConfig();
 let mode = 'user';
 
 const remoteSocket = dgram.createSocket('udp4');
+const remote_server_port = config.get('remote.server_port');
+const remote_server_addr = config.get('remote.server_address');
 
 /*publisher.bind('tcp://*:5555', function(err) {
     if(err)
@@ -54,7 +56,9 @@ const setSteeringFromRemote = (value) => {
     if (mode === 'user') {
         actuatorSteering.setValue(value);
         //publisher.send(['remote_steering', value]);
-        remoteSocket.send(`st;${parseFloat(value).toFixed(4)}`, config.get('remote.server_port'), config.get('remote.server_address'), err => console.error(err));
+        remoteSocket.send(`st;${parseFloat(value).toFixed(4)}`, remote_server_port, remote_server_addr, err => {
+            if(err) console.error(err);
+        });
     }
 }
 const setSteeringFromZmq = (value) => {
@@ -66,7 +70,9 @@ const setThrottleFromRemote = (value) => {
     if (mode !== 'local') {
         actuatorThrottle.setValue(value);
 //        publisher.send(['remote_throttle', value]);
-        remoteSocket.send(`th;${parseFloat(value).toFixed(4)}`, config.get('remote.server_port'), config.get('remote.server_address'), err => console.error(err));
+        remoteSocket.send(`th;${parseFloat(value).toFixed(4)}`, remote_server_port, remote_server_addr, err => {
+            if (err) console.error(err);
+        });
     }
 }
 const setThrottleFromZmq = (value) => {
@@ -112,7 +118,9 @@ const remoteMode = new RemoteSwitchChannel({
             }
         }
         //publisher.send(['remote_mode', value]);
-        remoteSocket.send(`md;${mode}`, config.get('remote.server_port'), config.get('remote.server_address'), err => console.error(err));        
+        remoteSocket.send(`md;${mode}`, remote_server_port, remote_server_addr, err => {
+            if (err) console.error(err);
+        });        
     }
 });
 
