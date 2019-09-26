@@ -7,3 +7,5 @@ configServer:
 remote:
   server_port: 5001
   server_address: "10.42.0.1"
+hardware:
+  REMOTE_MODE_PIN: 22
