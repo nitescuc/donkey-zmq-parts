@@ -81,7 +81,7 @@ const setMode = (value) => {
 const remoteSteering = new RemoteChannel({
     pin: REMOTE_STEERING_PIN,
     remapValues: [-1, 1],
-    sensitivity: 0.02,
+    sensitivity: 0.015,
     callback: (channel, value) => {
         setSteeringFromRemote(value);
     }
@@ -89,7 +89,7 @@ const remoteSteering = new RemoteChannel({
 const remoteThrottle = new RemoteChannel({
     pin: REMOTE_THROTTLE_PIN,
     remapValues: [-1, 1],
-    sensitivity: 0.02,
+    sensitivity: 0.015,
     callback: (channel, value) => {
         setThrottleFromRemote(value);
     }
