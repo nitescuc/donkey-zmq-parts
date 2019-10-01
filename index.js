@@ -50,6 +50,9 @@ const setSteeringFromRemote = (value) => {
             if(err) console.error(err);
         });
     }
+    if (!REMOTE_MODE_PIN && (Math.abs(value) > 0.5)) {
+        changeMode(value > 0);
+    }
 }
 const setSteeringFromZmq = (value) => {
     if (mode !== 'user') {
@@ -63,6 +66,19 @@ const setThrottleFromRemote = (value) => {
             if (err) console.error(err);
         });
     }
+}
+const changeMode = value => {
+    if (mode !== 'user') {
+        if (value) {
+            mode = 'local';
+        } else {
+            mode = 'local_angle';
+            setThrottleFromRemote(0);
+        }
+    }
+    remoteSocket.send(`md;${mode}`, remote_server_port, remote_server_addr, err => {
+        if (err) console.error(err);
+    });
 }
 const setThrottleFromZmq = (value) => {
     if (mode === 'local') {
@@ -99,17 +115,7 @@ if (REMOTE_MODE_PIN) {
         pin: REMOTE_MODE_PIN,
         remapValues: [false, true],
         callback: (channel, value) => {
-            if (mode !== 'user') {
-                if (value) {
-                    mode = 'local';
-                } else {
-                    mode = 'local_angle';
-                    setThrottleFromRemote(0);
-                }
-            }
-            remoteSocket.send(`md;${mode}`, remote_server_port, remote_server_addr, err => {
-                if (err) console.error(err);
-            });        
+            changeMode(value);
         }
     });
 }
