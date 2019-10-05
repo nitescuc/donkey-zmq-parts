@@ -146,7 +146,7 @@ actuatorServer.bind(config.get('actuator.server_port'));
     }
 });*/
 
-config.on('max_pulse', value => actuatorThrottle.setMaxRemapValue(value));
+config.on('max_pulse', value => actuatorThrottle.setRemapMaxValue(value));
 
 const updateLed = () => {
     ledDisplay.update(mode, actuatorThrottle.getValue());
