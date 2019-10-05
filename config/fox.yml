@@ -1,6 +1,6 @@
 actuator:
   max_pulse: 1700
-  min_pulse: 1200
+  min_pulse: 1100
   server_port: 5001
 remote:
   server_port: 5002

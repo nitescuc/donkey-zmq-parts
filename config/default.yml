@@ -1,7 +1,7 @@
 actuator:
   emitter: tcp://127.0.0.1:5555
   max_pulse: 1800
-  min_pulse: 1200
+  min_pulse: 1100
   server_port: 5001
 configServer:
   emitter: tcp://127.0.0.1:5556
