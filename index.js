@@ -146,6 +146,7 @@ actuatorServer.bind(config.get('actuator.server_port'));
     }
 });*/
 
+config.on('min_pulse', value => actuatorThrottle.setRemapMinValue(value));
 config.on('max_pulse', value => actuatorThrottle.setRemapMaxValue(value));
 
 const updateLed = () => {
