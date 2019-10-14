@@ -36,7 +36,8 @@ const ledDisplay = new LedDisplay({
 
 const actuatorSteering = new Actuator({
     pin: ACTUATOR_STEERING,
-    remapValues: [1000, 2000]
+    remapValues: [1000, 2000],
+    trim: config.get('actuator.trim')
 });
 const actuatorThrottle = new Actuator({
     pin: ACTUATOR_THROTTLE,
@@ -148,6 +149,7 @@ actuatorServer.bind(config.get('actuator.server_port'));
 
 config.on('min_pulse', value => actuatorThrottle.setRemapMinValue(value));
 config.on('max_pulse', value => actuatorThrottle.setRemapMaxValue(value));
+config.on('actuator_trim', value => actuatorThrottle.setTrimValue(value));
 
 const updateLed = () => {
     ledDisplay.update(mode, actuatorThrottle.getValue());

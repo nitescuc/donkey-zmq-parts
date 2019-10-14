@@ -3,6 +3,7 @@ actuator:
   max_pulse: 1800
   min_pulse: 1100
   server_port: 5001
+  trim: 0
 configServer:
   emitter: tcp://127.0.0.1:5556
 remote:
