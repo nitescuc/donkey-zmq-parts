@@ -149,7 +149,7 @@ actuatorServer.bind(config.get('actuator.server_port'));
 
 config.on('min_pulse', value => actuatorThrottle.setRemapMinValue(value));
 config.on('max_pulse', value => actuatorThrottle.setRemapMaxValue(value));
-config.on('actuator_trim', value => actuatorThrottle.setTrimValue(value));
+config.on('actuator_trim', value => actuatorSteering.setTrimValue(value));
 
 const updateLed = () => {
     ledDisplay.update(mode, actuatorThrottle.getValue());
