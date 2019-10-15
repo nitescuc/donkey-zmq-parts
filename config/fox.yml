@@ -2,6 +2,7 @@ actuator:
   max_pulse: 1645
   min_pulse: 1000
   server_port: 5001
+  trim: -40
 remote:
   server_port: 5002
   server_address: "127.0.0.1"
