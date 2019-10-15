@@ -12,8 +12,9 @@ class Config extends EventEmitter {
         receiver.connect(config.get('configServer.emitter'));
         receiver.subscribe('config');
         receiver.on('message', (topic, message) => {
+            console.log('Received new message', message.toString());
             try{
-                const newConf = JSON.parse(message);
+                const newConf = JSON.parse(message.toString());
                 Object.keys(newConf).forEach(key => this.set(key, newConf[key]));
             } catch(e) {
                 console.error(e);

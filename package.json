@@ -22,6 +22,7 @@
     "@nitescuc/rccar-remote-reader": "git+https://github.com/nitescuc/rccar-remote-reader.git",
     "config": "^3.1.0",
     "js-yaml": "^3.13.1",
-    "pigpio": "^1.2.2"
+    "pigpio": "^1.2.2",
+    "zmq": "2.15.3"
   }
 }

@@ -6,9 +6,11 @@ const { Config } = require('./src/config');
 const { LedDisplay } = require('./src/led');
 const dgram = require('dgram');
 
-const REMOTE_STEERING_PIN = 17;
-const REMOTE_THROTTLE_PIN = 27;
-const REMOTE_MODE_PIN = 22;
+const config = Config.getConfig();
+
+const REMOTE_STEERING_PIN = config.get('hardware.REMOTE_STEERING_PIN');
+const REMOTE_THROTTLE_PIN = config.get('hardware.REMOTE_THROTTLE_PIN');
+const REMOTE_MODE_PIN = config.get('hardware.REMOTE_MODE_PIN');
 
 const ACTUATOR_STEERING = 24;
 const ACTUATOR_THROTTLE = 23;
@@ -19,8 +21,6 @@ const RPM_DATA_PIN = 19;
 const LED_RED = 16;
 const LED_GREEN = 21;
 const LED_BLUE = 20;
-
-const config = Config.getConfig();
 
 let mode = 'user';
 
@@ -36,7 +36,8 @@ const ledDisplay = new LedDisplay({
 
 const actuatorSteering = new Actuator({
     pin: ACTUATOR_STEERING,
-    remapValues: [1000, 2000]
+    remapValues: [1000, 2000],
+    trim: config.get('actuator.trim')
 });
 const actuatorThrottle = new Actuator({
     pin: ACTUATOR_THROTTLE,
@@ -52,6 +53,9 @@ const setSteeringFromRemote = (value) => {
             if(err) console.error(err);
         });
     }
+    if (!REMOTE_MODE_PIN && (Math.abs(value) > 0.5)) {
+        changeMode(value > 0);
+    }
 }
 const setSteeringFromZmq = (value) => {
     if (mode !== 'user') {
@@ -65,6 +69,19 @@ const setThrottleFromRemote = (value) => {
             if (err) console.error(err);
         });
     }
+}
+const changeMode = value => {
+    if (mode !== 'user') {
+        if (value) {
+            mode = 'local';
+        } else {
+            mode = 'local_angle';
+            setThrottleFromRemote(0);
+        }
+    }
+    remoteSocket.send(`md;${mode}`, remote_server_port, remote_server_addr, err => {
+        if (err) console.error(err);
+    });
 }
 const setThrottleFromZmq = (value) => {
     if (mode === 'local') {
@@ -83,7 +100,7 @@ const setMode = (value) => {
 const remoteSteering = new RemoteChannel({
     pin: REMOTE_STEERING_PIN,
     remapValues: [-1, 1],
-    sensitivity: 0.02,
+    sensitivity: 0.015,
     callback: (channel, value) => {
         setSteeringFromRemote(value);
     }
@@ -91,28 +108,20 @@ const remoteSteering = new RemoteChannel({
 const remoteThrottle = new RemoteChannel({
     pin: REMOTE_THROTTLE_PIN,
     remapValues: [-1, 1],
-    sensitivity: 0.02,
+    sensitivity: 0.015,
     callback: (channel, value) => {
         setThrottleFromRemote(value);
     }
 });
-const remoteMode = new RemoteSwitchChannel({
-    pin: REMOTE_MODE_PIN,
-    remapValues: [false, true],
-    callback: (channel, value) => {
-        if (mode !== 'user') {
-            if (value) {
-                mode = 'local';
-            } else {
-                mode = 'local_angle';
-                setThrottleFromRemote(0);
-            }
+if (REMOTE_MODE_PIN) {
+    const remoteMode = new RemoteSwitchChannel({
+        pin: REMOTE_MODE_PIN,
+        remapValues: [false, true],
+        callback: (channel, value) => {
+            changeMode(value);
         }
-        remoteSocket.send(`md;${mode}`, remote_server_port, remote_server_addr, err => {
-            if (err) console.error(err);
-        });        
-    }
-});
+    });
+}
 
 
 const actuatorServer = dgram.createSocket('udp4');
@@ -140,7 +149,9 @@ const rpmReader = new RpmReader({
     }
 });
 
-config.on('max_pulse', value => actuatorThrottle.setMaxRemapValue(value));
+config.on('min_pulse', value => actuatorThrottle.setRemapMinValue(value));
+config.on('max_pulse', value => actuatorThrottle.setRemapMaxValue(value));
+config.on('actuator_trim', value => actuatorSteering.setTrimValue(value));
 
 const updateLed = () => {
     ledDisplay.update(mode, actuatorThrottle.getValue());
