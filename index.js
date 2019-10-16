@@ -23,6 +23,7 @@ const LED_GREEN = 21;
 const LED_BLUE = 20;
 
 let mode = 'user';
+let rpm = 10000;
 
 const remoteSocket = dgram.createSocket('udp4');
 const remote_server_port = config.get('remote.server_port');
@@ -47,7 +48,7 @@ const actuatorThrottle = new Actuator({
 const setSteeringFromRemote = (value) => {
     if (mode === 'user') {
         actuatorSteering.setValue(value);
-        remoteSocket.send(`st;${parseFloat(value).toFixed(8)}`, remote_server_port, remote_server_addr, err => {
+        remoteSocket.send(`st;${parseFloat(value).toFixed(4)}`, remote_server_port, remote_server_addr, err => {
             if(err) console.error(err);
         });
     }
@@ -63,7 +64,7 @@ const setSteeringFromZmq = (value) => {
 const setThrottleFromRemote = (value) => {
     if (mode !== 'local') {
         actuatorThrottle.setValue(value);
-        remoteSocket.send(`th;${parseFloat(value).toFixed(8)}`, remote_server_port, remote_server_addr, err => {
+        remoteSocket.send(`th;${parseFloat(value).toFixed(4)}`, remote_server_port, remote_server_addr, err => {
             if (err) console.error(err);
         });
     }
@@ -139,13 +140,13 @@ actuatorServer.on('message', (msg, rinfo) => {
 });
 actuatorServer.bind(config.get('actuator.server_port'));
 
-/*const rpmReader = new RpmReader({
+const rpmReader = new RpmReader({
     pin: RPM_DATA_PIN,
     powerPin: RPM_POWER_PIN,
     callback: (channel, value) => {
-        publisher.send(['rpm', value]);
+        rpm = value;
     }
-});*/
+});
 
 config.on('min_pulse', value => actuatorThrottle.setRemapMinValue(value));
 config.on('max_pulse', value => actuatorThrottle.setRemapMaxValue(value));
@@ -154,4 +155,14 @@ config.on('actuator_trim', value => actuatorSteering.setTrimValue(value));
 const updateLed = () => {
     ledDisplay.update(mode, actuatorThrottle.getValue());
 }
-setInterval(updateLed, 1000);
+let updateCount = 0;
+const slowUpdate = () => {
+    remoteSocket.send(`rpm;${rpm}`, remote_server_port, remote_server_addr, err => {
+        if (err) console.error(err);
+    });    
+    if (updateCount++ > 9) {
+        updateLed();
+        updateCount = 0;
+    }
+}
+setInterval(slowUpdate, 100);
