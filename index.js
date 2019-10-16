@@ -145,6 +145,9 @@ const rpmReader = new RpmReader({
     powerPin: RPM_POWER_PIN,
     callback: (channel, value) => {
         rpm = value;
+        remoteSocket.send(`rpm;${rpm}`, remote_server_port, remote_server_addr, err => {
+            if (err) console.error(err);
+        });
     }
 });
 
@@ -155,7 +158,7 @@ config.on('actuator_trim', value => actuatorSteering.setTrimValue(value));
 const updateLed = () => {
     ledDisplay.update(mode, actuatorThrottle.getValue());
 }
-let updateCount = 0;
+/*let updateCount = 0;
 const slowUpdate = () => {
     remoteSocket.send(`rpm;${rpm}`, remote_server_port, remote_server_addr, err => {
         if (err) console.error(err);
@@ -166,3 +169,5 @@ const slowUpdate = () => {
     }
 }
 setInterval(slowUpdate, 100);
+*/
+setInterval(updateLed, 1000);
