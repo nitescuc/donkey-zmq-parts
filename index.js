@@ -27,8 +27,8 @@ const remote_server_addr = config.get('remote.server_address');
 
 const ledDisplay = new LedDisplay({
     redPin: config.get('hardware.LED_RED'),
-    greenPin: config.get('LED_GREEN'),
-    bluePin: config.get('LED_BLUE')
+    greenPin: config.get('hardware.LED_GREEN'),
+    bluePin: config.get('hardware.LED_BLUE')
 });
 
 const actuatorSteering = new Actuator({
