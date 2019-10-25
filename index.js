@@ -18,10 +18,6 @@ const ACTUATOR_THROTTLE = 23;
 const RPM_POWER_PIN = 26;
 const RPM_DATA_PIN = 19;
 
-const LED_RED = 16;
-const LED_GREEN = 21;
-const LED_BLUE = 20;
-
 let mode = 'user';
 let rpm = 10000;
 
@@ -30,9 +26,9 @@ const remote_server_port = config.get('remote.server_port');
 const remote_server_addr = config.get('remote.server_address');
 
 const ledDisplay = new LedDisplay({
-    redPin: LED_RED,
-    greenPin: LED_GREEN,
-    bluePin: LED_BLUE
+    redPin: config.get('hardware.LED_RED'),
+    greenPin: config.get('LED_GREEN'),
+    bluePin: config.get('LED_BLUE')
 });
 
 const actuatorSteering = new Actuator({

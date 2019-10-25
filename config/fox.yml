@@ -6,3 +6,7 @@ actuator:
 remote:
   server_port: 5002
   server_address: "127.0.0.1"
+hardware:
+  LED_RED: 21
+  LED_GREEN: 20
+  LED_BLUE: 16
