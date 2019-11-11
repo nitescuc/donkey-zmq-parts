@@ -4,6 +4,10 @@ actuator:
   min_pulse: 1100
   server_port: 5001
   trim: 0
+  sensor_targets:
+    _4285: 3000
+    _7142: 2000
+  breakIntensity: 5000
 configServer:
   emitter: tcp://127.0.0.1:5556
 remote:

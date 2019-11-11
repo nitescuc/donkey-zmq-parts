@@ -38,7 +38,10 @@ const actuatorSteering = new Actuator({
 });
 const actuatorThrottle = new Actuator({
     pin: ACTUATOR_THROTTLE,
-    remapValues: [config.get('actuator.min_pulse'), config.get('actuator.max_pulse')]
+    remapValues: [config.get('actuator.min_pulse'), config.get('actuator.max_pulse')],
+    
+    sensorTargets: config.get('actuator.sensor_targets'),
+    breakIntensity: config.get('actuator.break_intensity')
 });
 
 const setSteeringFromRemote = (value) => {
@@ -141,15 +144,18 @@ const rpmReader = new RpmReader({
     powerPin: RPM_POWER_PIN,
     callback: (channel, value) => {
         rpm = value;
-        remoteSocket.send(`rpm;${rpm}`, remote_server_port, remote_server_addr, err => {
-            if (err) console.error(err);
-        });
+        actuatorThrottle.setSensorValue(rpm);
+//        remoteSocket.send(`rpm;${rpm}`, remote_server_port, remote_server_addr, err => {
+//            if (err) console.error(err);
+//        });
     }
 });
 
 config.on('min_pulse', value => actuatorThrottle.setRemapMinValue(value));
 config.on('max_pulse', value => actuatorThrottle.setRemapMaxValue(value));
 config.on('actuator_trim', value => actuatorSteering.setTrimValue(value));
+config.on('actuator_sensor_targets', value => actuatorThrottle.setSensorTargets(value));
+config.on('actuator_break_intensity', value => actuatorThrottle.setBreakIntensity(value));
 
 const updateLed = () => {
     ledDisplay.update(mode, actuatorThrottle.getValue());
