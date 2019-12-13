@@ -1,7 +1,6 @@
 const Gpio = require('pigpio').Gpio;
 const { RemoteChannel, RemoteSwitchChannel } = require('@nitescuc/rccar-remote-reader');
 const { Actuator } = require('@nitescuc/rccar-actuator');
-const { RpmReader } = require('@nitescuc/brushless-rpm');
 const { Config } = require('./src/config');
 const { LedDisplay } = require('./src/led');
 const dgram = require('dgram');
@@ -12,14 +11,10 @@ const REMOTE_STEERING_PIN = config.get('hardware.REMOTE_STEERING_PIN');
 const REMOTE_THROTTLE_PIN = config.get('hardware.REMOTE_THROTTLE_PIN');
 const REMOTE_MODE_PIN = config.get('hardware.REMOTE_MODE_PIN');
 
-const ACTUATOR_STEERING = 24;
-const ACTUATOR_THROTTLE = 23;
-
-const RPM_POWER_PIN = 26;
-const RPM_DATA_PIN = 19;
+const ACTUATOR_STEERING = config.get('hardware.ACTUATOR_STEERING');
+const ACTUATOR_THROTTLE = config.get('hardware.ACTUATOR_THROTTLE');
 
 let mode = 'user';
-let rpm = 10000;
 
 const remoteSocket = dgram.createSocket('udp4');
 const remote_server_port = config.get('remote.server_port');
@@ -38,10 +33,7 @@ const actuatorSteering = new Actuator({
 });
 const actuatorThrottle = new Actuator({
     pin: ACTUATOR_THROTTLE,
-    remapValues: [config.get('actuator.min_pulse'), config.get('actuator.max_pulse')],
-    
-    sensorTargets: config.get('actuator.sensor_targets'),
-    breakIntensity: config.get('actuator.break_intensity')
+    remapValues: [config.get('actuator.min_pulse'), config.get('actuator.max_pulse')]
 });
 
 const setSteeringFromRemote = (value) => {
@@ -55,7 +47,7 @@ const setSteeringFromRemote = (value) => {
         changeMode(value > 0);
     }
 }
-const setSteeringFromZmq = (value) => {
+const setSteeringFromMessage = (value) => {
     if (mode !== 'user') {
         actuatorSteering.setValue(value);
     }
@@ -81,7 +73,7 @@ const changeMode = value => {
         if (err) console.error(err);
     });
 }
-const setThrottleFromZmq = (value) => {
+const setThrottleFromMessage = (value) => {
     if (mode === 'local') {
         actuatorThrottle.setValue(value);
     }
@@ -133,43 +125,17 @@ actuatorServer.on('error', (err) => {
 });
 actuatorServer.on('message', (msg, rinfo) => {
     const parts = msg.toString().split(';');
-    parts[0] && setSteeringFromZmq(parseFloat(parts[0]));
-    parts[1] && setThrottleFromZmq(parseFloat(parts[1]));
+    parts[0] && setSteeringFromMessage(parseFloat(parts[0]));
+    parts[1] && setThrottleFromMessage(parseFloat(parts[1]));
     parts[2] && setMode(parts[2]);
 });
 actuatorServer.bind(config.get('actuator.server_port'));
 
-const rpmReader = new RpmReader({
-    pin: RPM_DATA_PIN,
-    powerPin: RPM_POWER_PIN,
-    callback: (channel, value) => {
-        rpm = value;
-        actuatorThrottle.setSensorValue(rpm);
-//        remoteSocket.send(`rpm;${rpm}`, remote_server_port, remote_server_addr, err => {
-//            if (err) console.error(err);
-//        });
-    }
-});
-
 config.on('min_pulse', value => actuatorThrottle.setRemapMinValue(value));
 config.on('max_pulse', value => actuatorThrottle.setRemapMaxValue(value));
 config.on('actuator_trim', value => actuatorSteering.setTrimValue(value));
-config.on('actuator_sensor_targets', value => actuatorThrottle.setSensorTargets(value));
-config.on('actuator_break_intensity', value => actuatorThrottle.setBreakIntensity(value));
 
 const updateLed = () => {
     ledDisplay.update(mode, actuatorThrottle.getValue());
 }
-/*let updateCount = 0;
-const slowUpdate = () => {
-    remoteSocket.send(`rpm;${rpm}`, remote_server_port, remote_server_addr, err => {
-        if (err) console.error(err);
-    });    
-    if (updateCount++ > 9) {
-        updateLed();
-        updateCount = 0;
-    }
-}
-setInterval(slowUpdate, 100);
-*/
 setInterval(updateLed, 1000);

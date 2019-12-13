@@ -4,10 +4,6 @@ actuator:
   min_pulse: 1100
   server_port: 5001
   trim: 0
-  sensor_targets:
-    _4285: 3000
-    _7142: 2000
-  break_intensity: 5000
 configServer:
   emitter: tcp://127.0.0.1:5556
 remote:
@@ -16,7 +12,9 @@ remote:
 hardware:
   REMOTE_STEERING_PIN: 17
   REMOTE_THROTTLE_PIN: 27
-  REMOTE_MODE_PIN: 0
+  REMOTE_MODE_PIN: 22
+  ACTUATOR_STEERING: 24
+  ACTUATOR_THROTTLE: 23
   LED_RED: 16
   LED_GREEN: 21
   LED_BLUE: 20

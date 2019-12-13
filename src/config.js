@@ -1,6 +1,6 @@
 const config = require('config');
 const EventEmitter = require('events');
-const zmq = require('zmq');
+const zmq = require('zeromq');
 const receiver = zmq.socket('sub');
 
 let conf;
