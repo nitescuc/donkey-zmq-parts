@@ -40,7 +40,7 @@ const actuatorThrottle = new Actuator({
     pin: ACTUATOR_THROTTLE,
     remapValues: [config.get('actuator.min_pulse'), config.get('actuator.max_pulse')],
     
-    sensorTargets: config.get('actuator.sensor_targets'),
+    sensorTargets: Object.assign({}, config.get('actuator.sensor_targets') || {}),
     breakIntensity: config.get('actuator.break_intensity')
 });
 
