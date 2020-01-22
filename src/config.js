@@ -1,7 +1,6 @@
 const config = require('config');
 const EventEmitter = require('events');
-const zmq = require('zmq');
-const receiver = zmq.socket('sub');
+const mqtt = require('mqtt');
 
 let conf;
 
@@ -9,16 +8,19 @@ class Config extends EventEmitter {
     constructor() {
         super();
         this.overrides = {};
-        receiver.connect(config.get('configServer.emitter'));
-        receiver.subscribe('config');
-        receiver.on('message', (topic, message) => {
-            console.log('Received new message', message.toString());
-            try{
-                const newConf = JSON.parse(message.toString());
-                Object.keys(newConf).forEach(key => this.set(key, newConf[key]));
-            } catch(e) {
-                console.error(e);
-            }
+        mqtt.connectAsync(config.get('configServer.mqtt')).then((client) => {
+            client.on('message', (topic, payload) => {
+                console.log('Received new message', payload.toString());
+                try{
+                    const newConf = JSON.parse(payload.toString());
+                    Object.keys(newConf).forEach(key => this.set(key, newConf[key]));
+                } catch(e) {
+                    console.error(e);
+                }
+            });
+            client.subscribe(['config']);
+        }).catch(e => {
+            console.error('Error connecting to mqtt', e);
         });
     }
     static getConfig() {

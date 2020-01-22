@@ -5,6 +5,7 @@ actuator:
   trim: 55
 configServer:
   emitter: tcp://10.42.0.1:5556
+  mqtt: mqtt://10.42.0.1:1883
 remote:
   server_port: 5001
   server_address: "10.42.0.1"
