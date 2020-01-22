@@ -74,6 +74,7 @@ const changeMode = value => {
             mode = 'local';
         } else {
             mode = 'local_angle';
+            actuatorThrottle.stop(() => { setThrottleFromRemote(0); })
             setThrottleFromRemote(0);
         }
     }
