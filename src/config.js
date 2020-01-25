@@ -8,7 +8,8 @@ class Config extends EventEmitter {
     constructor() {
         super();
         this.overrides = {};
-        mqtt.connectAsync(config.get('configServer.mqtt')).then((client) => {
+        const client = mqtt.connect(config.get('configServer.mqtt'));
+        client.on('connect', () => {
             client.on('message', (topic, payload) => {
                 console.log('Received new message', payload.toString());
                 try{
@@ -19,8 +20,9 @@ class Config extends EventEmitter {
                 }
             });
             client.subscribe(['config']);
-        }).catch(e => {
-            console.error('Error connecting to mqtt', e);
+        });
+        client.on('error', e => {
+            console.error('MQTT error', e);
         });
     }
     static getConfig() {
