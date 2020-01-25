@@ -10,6 +10,7 @@ actuator:
   break_intensity: 5000
 configServer:
   emitter: tcp://127.0.0.1:5556
+  mqtt: mqtt://127.0.0.1:1883
 remote:
   server_port: 5001
   server_address: "127.0.0.1"
