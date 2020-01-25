@@ -35,6 +35,7 @@ class Config extends EventEmitter {
         return value;
     }
     set(key, value) {
+        console.log(`Config.set "${key}" value "${value}`);
         this.overrides[key] = value;
         this.emit(key, value);                
     }
