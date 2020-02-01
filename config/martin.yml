@@ -2,7 +2,7 @@ actuator:
   emitter: tcp://10.42.0.1:5555
   max_pulse: 1750
   min_pulse: 1000
-  trim: 55
+  trim: -20
 configServer:
   emitter: tcp://10.42.0.1:5556
   mqtt: mqtt://10.42.0.1:1883
