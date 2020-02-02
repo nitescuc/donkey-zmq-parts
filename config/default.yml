@@ -8,6 +8,7 @@ actuator:
     _4285: 3000
     _7142: 2000
   break_intensity: 5000
+  sensor_mode: 'none'
 configServer:
   emitter: tcp://127.0.0.1:5556
   mqtt: mqtt://127.0.0.1:1883

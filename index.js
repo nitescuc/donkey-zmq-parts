@@ -41,7 +41,8 @@ const actuatorThrottle = new Actuator({
     remapValues: [config.get('actuator.min_pulse'), config.get('actuator.max_pulse')],
     
     sensorTargets: Object.assign({}, config.get('actuator.sensor_targets') || {}),
-    breakIntensity: config.get('actuator.break_intensity')
+    breakIntensity: config.get('actuator.break_intensity'),
+    sensorMode: config.get('actuator.sensor_mode')
 });
 
 const setSteeringFromRemote = (value) => {

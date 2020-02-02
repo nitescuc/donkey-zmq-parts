@@ -1,8 +1,9 @@
 actuator:
   emitter: tcp://10.42.0.1:5555
-  max_pulse: 1750
+  max_pulse: 1690
   min_pulse: 1000
   trim: -20
+  sensor_mode: 'invert'
 configServer:
   emitter: tcp://10.42.0.1:5556
   mqtt: mqtt://10.42.0.1:1883
