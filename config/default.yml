@@ -5,8 +5,11 @@ actuator:
   server_port: 5001
   trim: 0
   sensor_targets:
-    _4285: 3000
-    _7142: 2000
+    _4286: 3000
+    _7143: 2000
+  throttle_rewrite:
+    _4286: 0.6
+    _7143: 0.8
   break_intensity: 5000
   sensor_mode: 'none'
 configServer:

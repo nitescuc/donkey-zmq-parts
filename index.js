@@ -41,6 +41,7 @@ const actuatorThrottle = new Actuator({
     remapValues: [config.get('actuator.min_pulse'), config.get('actuator.max_pulse')],
     
     sensorTargets: Object.assign({}, config.get('actuator.sensor_targets') || {}),
+    throttleRewrite: Object.assign({}, config.get('actuator.throttle_rewrite') || {}),
     breakIntensity: config.get('actuator.break_intensity'),
     sensorMode: config.get('actuator.sensor_mode')
 });
@@ -158,6 +159,7 @@ config.on('max_pulse', value => actuatorThrottle.setRemapMaxValue(value));
 config.on('actuator_trim', value => actuatorSteering.setTrimValue(value));
 config.on('actuator_sensor_targets', value => actuatorThrottle.setSensorTargets(value));
 config.on('actuator_break_intensity', value => actuatorThrottle.setBreakIntensity(value));
+config.on('actuator_throttle_rewrite', value => actuatorThrottle.setThrottleRewrite(value));
 
 const updateLed = () => {
     ledDisplay.update(mode, actuatorThrottle.getValue());
