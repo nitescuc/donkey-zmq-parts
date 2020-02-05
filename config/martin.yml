@@ -5,8 +5,8 @@ actuator:
   trim: -20
   sensor_mode: 'invert'
   sensor_targets:
-    _4286: 3500
-    _7143: 2500
+    _4286: 4500
+    _7143: 3500
   throttle_rewrite:
     _4286: 0.5
     _7143: 0.75
