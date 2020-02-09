@@ -52,7 +52,7 @@ const actuatorThrottle = new Actuator({
     breakIntensity: config.get('actuator.break_intensity'),
     sensorMode: config.get('actuator.sensor_mode')
 });
-const sonar = null;
+let sonar = null;
 if (SONAR_TRIGGER) {
     sonar = new SonarReader({
         triggerPrin: SONAR_TRIGGER,
