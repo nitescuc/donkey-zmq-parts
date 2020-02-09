@@ -2,9 +2,9 @@ const Gpio = require('pigpio').Gpio;
 const { RemoteChannel, RemoteSwitchChannel } = require('@nitescuc/rccar-remote-reader');
 const { Actuator } = require('@nitescuc/rccar-actuator');
 const { RpmReader } = require('@nitescuc/brushless-rpm');
+const { SonarReader } = require('@nitescuc/rccar-sonar');
 const { Config } = require('./src/config');
 const { LedDisplay } = require('./src/led');
-const { SonarReader } = require('./parts/hc-sr04');
 
 const dgram = require('dgram');
 const mqtt = require('mqtt');
@@ -52,16 +52,15 @@ const actuatorThrottle = new Actuator({
     breakIntensity: config.get('actuator.break_intensity'),
     sensorMode: config.get('actuator.sensor_mode')
 });
-let sonar = null;
 if (SONAR_TRIGGER) {
-    sonar = new SonarReader({
-        triggerPrin: SONAR_TRIGGER,
-        echoPin: SONAR_ECHO,
-        cb: dist => {
-            distance = dist;
-        }
+    const sonar = new SonarReader({
+        triggerPin: SONAR_TRIGGER,
+        echoPin: SONAR_ECHO
     });
-    setInterval(() => sonar.trigger(), 50);
+    sonar.on('distance', dist => {
+        distance = dist;
+    })
+    setInterval(() => sonar.update(), 50);
 }
 
 const setSteeringFromRemote = (value) => {

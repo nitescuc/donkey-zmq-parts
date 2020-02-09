@@ -29,7 +29,7 @@ class SonarReader {
     getDistance() {
         return Math.round(this.distance);
     }
-    trigger() {
+    update() {
         if (this.config.triggerPin) {
             this.trigger.trigger(10, 1);                    
         }
