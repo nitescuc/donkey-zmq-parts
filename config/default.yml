@@ -25,4 +25,5 @@ hardware:
   LED_RED: 16
   LED_GREEN: 21
   LED_BLUE: 20
-  
+  SONAR_TRIGGER: 0
+  SONAR_ECHO: 0

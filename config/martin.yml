@@ -19,3 +19,5 @@ remote:
   server_address: "10.42.0.1"
 hardware:
   REMOTE_MODE_PIN: 22
+  SONAR_TRIGGER: 7
+  SONAR_ECHO: 1

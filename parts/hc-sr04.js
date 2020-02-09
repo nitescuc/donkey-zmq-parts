@@ -7,6 +7,10 @@ class SonarReader {
     constructor(config) {
         this.config = config;
         this.config.frequency = this.config.frequency || 100;
+        if (this.config.triggerPin) {
+            this.trigger = new Gpio(this.config.triggerPin, {mode: Gpio.OUTPUT});
+            this.trigger.digitalWrite(0); // Make sure trigger is low    
+        }
         this.echo = new Gpio(this.config.echoPin, {mode: Gpio.INPUT, alert: true});
         this.echo.pullUpDown(Gpio.PUD_UP);
         this.echo.on('alert', (level, tick) => {
@@ -21,6 +25,11 @@ class SonarReader {
     }
     getDistance() {
         return Math.round(this.distance);
+    }
+    trigger() {
+        if (this.config.triggerPin) {
+            this.trigger.trigger(10, 1);                    
+        }
     }
 }
 
@@ -49,4 +58,4 @@ class SonarGroup {
     }
 }
 
-module.exports = { SonarGroup };
+module.exports = { SonarGroup, SonarReader };

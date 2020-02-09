@@ -4,13 +4,19 @@ const { Actuator } = require('@nitescuc/rccar-actuator');
 const { RpmReader } = require('@nitescuc/brushless-rpm');
 const { Config } = require('./src/config');
 const { LedDisplay } = require('./src/led');
+const { SonarReader } = require('./parts/hc-sr04');
+
 const dgram = require('dgram');
+const mqtt = require('mqtt');
 
 const config = Config.getConfig();
 
 const REMOTE_STEERING_PIN = config.get('hardware.REMOTE_STEERING_PIN');
 const REMOTE_THROTTLE_PIN = config.get('hardware.REMOTE_THROTTLE_PIN');
 const REMOTE_MODE_PIN = config.get('hardware.REMOTE_MODE_PIN');
+
+const SONAR_TRIGGER = config.get('hardware.SONAR_TRIGGER');
+const SONAR_ECHO = config.get('hardware.SONAR_ECHO');
 
 const ACTUATOR_STEERING = 24;
 const ACTUATOR_THROTTLE = 23;
@@ -20,6 +26,7 @@ const RPM_DATA_PIN = 19;
 
 let mode = 'user';
 let rpm = 10000;
+let distance = null;
 
 const remoteSocket = dgram.createSocket('udp4');
 const remote_server_port = config.get('remote.server_port');
@@ -45,6 +52,17 @@ const actuatorThrottle = new Actuator({
     breakIntensity: config.get('actuator.break_intensity'),
     sensorMode: config.get('actuator.sensor_mode')
 });
+const sonar = null;
+if (SONAR_TRIGGER) {
+    sonar = new SonarReader({
+        triggerPrin: SONAR_TRIGGER,
+        echoPin: SONAR_ECHO,
+        cb: dist => {
+            distance = dist;
+        }
+    });
+    setInterval(() => sonar.trigger(), 50);
+}
 
 const setSteeringFromRemote = (value) => {
     if (mode === 'user') {
@@ -148,9 +166,6 @@ const rpmReader = new RpmReader({
     callback: (channel, value) => {
         rpm = value;
         actuatorThrottle.setSensorValue(rpm);
-//        remoteSocket.send(`rpm;${rpm}`, remote_server_port, remote_server_addr, err => {
-//            if (err) console.error(err);
-//        });
     }
 });
 
@@ -161,8 +176,19 @@ config.on('actuator_sensor_targets', value => actuatorThrottle.setSensorTargets(
 config.on('actuator_break_intensity', value => actuatorThrottle.setBreakIntensity(value));
 config.on('actuator_throttle_rewrite', value => actuatorThrottle.setThrottleRewrite(value));
 
+// debug messages
+const mqttClient = mqtt.connect(config.get('configServer.mqtt'));
+mqttClient.on('error', e => {
+    console.error('MQTT error', e);
+});
+
 const updateLed = () => {
     ledDisplay.update(mode, actuatorThrottle.getValue());
+    mqttClient.publish('status/devices', JSON.stringify({
+        distance,
+        mode,
+        rpm
+    }))
 }
 /*let updateCount = 0;
 const slowUpdate = () => {
