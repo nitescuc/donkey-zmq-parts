@@ -20,6 +20,9 @@ class SonarReader {
               const endTick = tick;
               const diff = (endTick >> 0) - (this.startTick >> 0); // Unsigned 32 bit arithmetic
               this.distance = diff / 2 / MICROSECDONDS_PER_CM;
+              if (this.config.cb) {
+                  this.config.cb(this.getDistance());
+              }
             }
         });
     }
