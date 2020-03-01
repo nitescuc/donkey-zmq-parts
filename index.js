@@ -6,6 +6,8 @@ const { SonarReader } = require('@nitescuc/rccar-sonar');
 const { Config } = require('./src/config');
 const { LedDisplay } = require('./src/led');
 
+const { ThrottleRewrite, ThrottleObstacle, ThrottlePIDSpeed, ThrottlePipeline } = require('./src/throttlePipeline');
+
 const dgram = require('dgram');
 const mqtt = require('mqtt');
 
@@ -46,12 +48,28 @@ const actuatorSteering = new Actuator({
 const actuatorThrottle = new Actuator({
     pin: ACTUATOR_THROTTLE,
     remapValues: [config.get('actuator.min_pulse'), config.get('actuator.max_pulse')],
-    
-    sensorTargets: Object.assign({}, config.get('actuator.sensor_targets') || {}),
-    throttleRewrite: Object.assign({}, config.get('actuator.throttle_rewrite') || {}),
-    breakIntensity: config.get('actuator.break_intensity'),
-    sensorMode: config.get('actuator.sensor_mode')
+//    sensorTargets: Object.assign({}, config.get('actuator.sensor_targets') || {}),
+//    throttleRewrite: Object.assign({}, config.get('actuator.throttle_rewrite') || {}),
+//    breakIntensity: config.get('actuator.break_intensity'),
+//    sensorMode: config.get('actuator.sensor_mode')
 });
+
+const throttleRewrite = new ThrottleRewrite({
+    sensorTargets: Object.assign({}, config.get('throttle.sensor_targets') || {})
+});
+const throttleObstacle = new throttleObstacle({
+    sensorTargets: Object.assign({}, config.get('throttle.sensor_targets') || {}),
+    slowdownLimit: config.get('sonar.slowdown_limit'),
+    breakLimit: config.get('sonar.break_limit')
+});
+const throttlePID = new ThrottlePIDSpeed({
+    sensorMode: config.get('throttle.sensor_mode')
+});
+const throttlePipeline = new ThrottlePipeline();
+throttlePipeline.addStage(throttleRewrite);
+throttlePipeline.addStage(throttleObstacle);
+throttlePipeline.addStage(throttlePID);
+
 if (SONAR_TRIGGER) {
     const sonar = new SonarReader({
         triggerPin: SONAR_TRIGGER,
@@ -59,6 +77,7 @@ if (SONAR_TRIGGER) {
     });
     sonar.on('distance', dist => {
         distance = dist;
+        throttleObstacle.setDistance(distance);
     })
     setInterval(() => sonar.update(), 50);
 }
@@ -74,7 +93,7 @@ const setSteeringFromRemote = (value) => {
         changeMode(value > 0);
     }
 }
-const setSteeringFromZmq = (value) => {
+const setSteeringFromMessage = (value) => {
     if (mode !== 'user') {
         actuatorSteering.setValue(value);
     }
@@ -101,9 +120,10 @@ const changeMode = value => {
         if (err) console.error(err);
     });
 }
-const setThrottleFromZmq = (value) => {
+const setThrottleFromMessage = (value) => {
     if (mode === 'local') {
-        actuatorThrottle.setValue(value);
+        //actuatorThrottle.setValue(value);
+        actuatorThrottle.setValue(throttlePipeline.compute(value));
     }
 }
 const setMode = (value) => {
@@ -153,8 +173,8 @@ actuatorServer.on('error', (err) => {
 });
 actuatorServer.on('message', (msg, rinfo) => {
     const parts = msg.toString().split(';');
-    parts[0] && setSteeringFromZmq(parseFloat(parts[0]));
-    parts[1] && setThrottleFromZmq(parseFloat(parts[1]));
+    parts[0] && setSteeringFromMessage(parseFloat(parts[0]));
+    parts[1] && setThrottleFromMessage(parseFloat(parts[1]));
     parts[2] && setMode(parts[2]);
 });
 actuatorServer.bind(config.get('actuator.server_port'));
@@ -164,16 +184,16 @@ const rpmReader = new RpmReader({
     powerPin: RPM_POWER_PIN,
     callback: (channel, value) => {
         rpm = value;
-        actuatorThrottle.setSensorValue(rpm);
+        //actuatorThrottle.setSensorValue(rpm);
+        throttlePID.setSensorValue(rpm);
     }
 });
 
 config.on('min_pulse', value => actuatorThrottle.setRemapMinValue(value));
 config.on('max_pulse', value => actuatorThrottle.setRemapMaxValue(value));
 config.on('actuator_trim', value => actuatorSteering.setTrimValue(value));
-config.on('actuator_sensor_targets', value => actuatorThrottle.setSensorTargets(value));
-config.on('actuator_break_intensity', value => actuatorThrottle.setBreakIntensity(value));
-config.on('actuator_throttle_rewrite', value => actuatorThrottle.setThrottleRewrite(value));
+config.on('actuator_sensor_targets', value => throttleRewrite.setSensorTargets(value));
+config.on('actuator_sensor_targets', value => throttleObstacle.setSensorTargets(value));
 
 // debug messages
 const mqttClient = mqtt.connect(config.get('configServer.mqtt'));
@@ -189,16 +209,4 @@ const updateLed = () => {
         rpm
     }))
 }
-/*let updateCount = 0;
-const slowUpdate = () => {
-    remoteSocket.send(`rpm;${rpm}`, remote_server_port, remote_server_addr, err => {
-        if (err) console.error(err);
-    });    
-    if (updateCount++ > 9) {
-        updateLed();
-        updateCount = 0;
-    }
-}
-setInterval(slowUpdate, 100);
-*/
 setInterval(updateLed, 1000);

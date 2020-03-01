@@ -3,14 +3,12 @@ actuator:
   max_pulse: 1700
   min_pulse: 1000
   trim: -20
+throttle:
   sensor_mode: 'invert'
   sensor_targets:
-    _4286: 4500
-    _7143: 3500
-  throttle_rewrite:
-    _4286: 0.5
-    _7143: 0.75
-  break_intensity: 300
+    slow: 4500
+    medium: 3500
+    fast: 2000
 configServer:
   emitter: tcp://10.42.0.1:5556
   mqtt: mqtt://10.42.0.1:1883
