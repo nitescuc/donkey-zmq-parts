@@ -57,7 +57,7 @@ const actuatorThrottle = new Actuator({
 const throttleRewrite = new ThrottleRewrite({
     sensorTargets: Object.assign({}, config.get('throttle.sensor_targets') || {})
 });
-const throttleObstacle = new throttleObstacle({
+const throttleObstacle = new ThrottleObstacle({
     sensorTargets: Object.assign({}, config.get('throttle.sensor_targets') || {}),
     slowdownLimit: config.get('sonar.slowdown_limit'),
     breakLimit: config.get('sonar.break_limit')

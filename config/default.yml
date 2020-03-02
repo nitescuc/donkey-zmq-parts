@@ -16,6 +16,9 @@ configServer:
 remote:
   server_port: 5001
   server_address: "127.0.0.1"
+sonar:
+  slowdown_limit: 100
+  break_limit: 50
 hardware:
   REMOTE_STEERING_PIN: 17
   REMOTE_THROTTLE_PIN: 27
