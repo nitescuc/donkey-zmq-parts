@@ -32,8 +32,8 @@ class ThrottleObstacle {
     }
 
     compute(value) {
-        if (value < this.breakLimit) return 10000;
-        if (value < this.slowdownLimit) return this.config.sensorTargets.slow;
+        if (this.distance < this.breakLimit) return 10000;
+        if (this.distance < this.slowdownLimit) return this.config.sensorTargets.slow;
         else return value;
     }
 }
@@ -41,7 +41,7 @@ class ThrottlePIDSpeed {
     constructor(config) {
         this.config = config;
         this.controller = new Controller({
-            k_p: 0.25,
+            k_p: 0.1,
             k_i: 0.01,
             k_d: 0.01
         });
@@ -54,10 +54,11 @@ class ThrottlePIDSpeed {
         this.sensorValue = value;
     }
     compute(value) {
-        this.controller.setTarget(value);
+        this.controller.setTarget(10000/value);
         let actuator = this.controller.update(this.sensorValue);
 
-        if (actuator > 1) actuator = 1;
+        if (actuator > 1) actuator = 0.8;
+        if (actuator < -1) actuator = -0.5;
 
         return actuator;
     }
