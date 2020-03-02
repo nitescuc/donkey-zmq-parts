@@ -10,6 +10,12 @@ throttle:
     slow: 4500
     medium: 3500
     fast: 2000
+  pid:            
+    k_p: 0.25
+    k_i: 0.01
+    k_d: 0.01
+  max_throttle: 1
+  min_throttle: -1
 configServer:
   emitter: tcp://127.0.0.1:5556
   mqtt: mqtt://127.0.0.1:1883

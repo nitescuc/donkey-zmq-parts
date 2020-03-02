@@ -39,13 +39,26 @@ class ThrottleObstacle {
 }
 class ThrottlePIDSpeed {
     constructor(config) {
-        this.config = config;
-        this.controller = new Controller({
-            k_p: 0.1,
+        this.config = config || {};
+        this.config.pid = this.config.pid || {
+            k_p: 0.25,
             k_i: 0.01,
             k_d: 0.01
-        });
+        };
+        this.config.maxThrottle = this.config.maxThrottle || 1;
+        this.config.minThrottle = this.config.minThrottle || -1;
+        this.controller = new Controller(this.config.pid);
         this.setSensorValue(10000);
+    }
+
+    setPid(value) {
+        this.config.pid = Object.assign(this.config.pid, value);
+    }
+    setMinThrottle(value) {
+        this.config.minThrottle = value;
+    }
+    setMaxThrottle(value) {
+        this.config.maxThrottle = value;
     }
 
     setSensorValue(value) {
@@ -57,8 +70,8 @@ class ThrottlePIDSpeed {
         this.controller.setTarget(10000/value);
         let actuator = this.controller.update(this.sensorValue);
 
-        if (actuator > 1) actuator = 0.8;
-        if (actuator < -1) actuator = -0.5;
+        if (actuator > this.maxThrottle) actuator = this.maxThrottle;
+        if (actuator < this.minThrottle) actuator = this.minThrottle;
 
         return actuator;
     }

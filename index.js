@@ -63,7 +63,10 @@ const throttleObstacle = new ThrottleObstacle({
     breakLimit: config.get('sonar.break_limit')
 });
 const throttlePID = new ThrottlePIDSpeed({
-    sensorMode: config.get('throttle.sensor_mode')
+    sensorMode: config.get('throttle.sensor_mode'),
+    pid: config.get('throttle.pid'),
+    maxThrottle: config.get('throttle.max_throttle'),
+    minThrottle: config.get('throttle.min_throttle')
 });
 const throttlePipeline = new ThrottlePipeline();
 throttlePipeline.addStage(throttleRewrite);
@@ -192,8 +195,13 @@ const rpmReader = new RpmReader({
 config.on('min_pulse', value => actuatorThrottle.setRemapMinValue(value));
 config.on('max_pulse', value => actuatorThrottle.setRemapMaxValue(value));
 config.on('actuator_trim', value => actuatorSteering.setTrimValue(value));
-config.on('actuator_sensor_targets', value => throttleRewrite.setSensorTargets(value));
-config.on('actuator_sensor_targets', value => throttleObstacle.setSensorTargets(value));
+config.on('actuator_sensor_targets', value => {
+    throttleRewrite.setSensorTargets(value);
+    throttleObstacle.setSensorTargets(value);
+});
+config.on('throttle_pid', value => throttlePID.setPid(value));
+config.on('throttle_max_throttle', value => throttlePID.setMaxThrottle(value));
+config.on('throttle_min_throttle', value => throttlePID.setMinThrottle(value));
 
 // debug messages
 const mqttClient = mqtt.connect(config.get('configServer.mqtt'));
