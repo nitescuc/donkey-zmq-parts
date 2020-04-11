@@ -65,8 +65,10 @@ class ThrottlePIDSpeed {
         if (value > 10000) value = 10000;
         if (this.config.sensorMode === 'invert') {
             value = 10000/value;
-            if (value > 50) value = 50;
         }
+
+        // filter some spikes
+        if (value > 3 * this.sensorValue) value = 3 * this.sensorValue;
 
         this.sensorValue = value;
     }
