@@ -62,16 +62,22 @@ class ThrottlePIDSpeed {
     }
 
     setSensorValue(value) {
+        if (value > 10000) value = 10000;
         if (this.config.sensorMode === 'invert') value = 10000/value;
 
         this.sensorValue = value;
     }
     compute(value) {
+        if (value >= 10000) return -1;
+        
         this.controller.setTarget(10000/value);
         let actuator = this.controller.update(this.sensorValue);
 
         if (actuator > this.maxThrottle) actuator = this.maxThrottle;
         if (actuator < this.minThrottle) actuator = this.minThrottle;
+
+        // protection: never send zero to avoid setting rear drive condition
+        if (Math.abs(actuator) < 0.2) actuator = 0.2;
 
         return actuator;
     }

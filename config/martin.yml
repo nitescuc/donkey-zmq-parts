@@ -9,6 +9,10 @@ throttle:
     slow: 4500
     medium: 3500
     fast: 2000
+  pid:
+    k_p: 0.1
+    k_i: 0.01
+    k_d: 0.001
 configServer:
   emitter: tcp://10.42.0.1:5556
   mqtt: mqtt://10.42.0.1:1883
