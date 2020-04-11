@@ -6,7 +6,7 @@ const { SonarReader } = require('@nitescuc/rccar-sonar');
 const { Config } = require('./src/config');
 const { LedDisplay } = require('./src/led');
 
-const { ThrottleRewrite, ThrottleObstacle, ThrottlePIDSpeed, ThrottlePipeline } = require('./src/throttlePipeline');
+const { ThrottleRewrite, ThrottleObstacle, ThrottlePIDSpeed, ThrottleReverseProtect, ThrottlePipeline } = require('./src/throttlePipeline');
 
 const dgram = require('dgram');
 const mqtt = require('mqtt');
@@ -68,10 +68,12 @@ const throttlePID = new ThrottlePIDSpeed({
     maxThrottle: config.get('throttle.max_throttle'),
     minThrottle: config.get('throttle.min_throttle')
 });
+const throttleReverseProtect = new ThrottleReverseProtect();
 const throttlePipeline = new ThrottlePipeline();
 throttlePipeline.addStage(throttleRewrite);
 throttlePipeline.addStage(throttleObstacle);
 throttlePipeline.addStage(throttlePID);
+throttlePipeline.addStage(throttleReverseProtect);
 
 if (SONAR_TRIGGER) {
     const sonar = new SonarReader({

@@ -2,19 +2,19 @@ actuator:
   emitter: tcp://10.42.0.1:5555
   max_pulse: 1630
   min_pulse: 1000
-  trim: -20
+  trim: -50
 throttle:
   sensor_mode: 'invert'
   sensor_targets:
 #    slow: 4500
 #    medium: 3500
 #    fast: 2000
-    slow: 4000
-    medium: 4000
-    fast: 4000
+    slow: 4800
+    medium: 4800
+    fast: 4800
   pid:
-    k_p: 0.1
-    k_i: 0.01
+    k_p: 1
+    k_i: 0.1
     k_d: 0.001
 configServer:
   emitter: tcp://10.42.0.1:5556

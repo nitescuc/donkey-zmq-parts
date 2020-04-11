@@ -63,7 +63,10 @@ class ThrottlePIDSpeed {
 
     setSensorValue(value) {
         if (value > 10000) value = 10000;
-        if (this.config.sensorMode === 'invert') value = 10000/value;
+        if (this.config.sensorMode === 'invert') {
+            value = 10000/value;
+            if (value > 50) value = 50;
+        }
 
         this.sensorValue = value;
     }
@@ -73,13 +76,27 @@ class ThrottlePIDSpeed {
         this.controller.setTarget(10000/value);
         let actuator = this.controller.update(this.sensorValue);
 
-        if (actuator > this.maxThrottle) actuator = this.maxThrottle;
-        if (actuator < this.minThrottle) actuator = this.minThrottle;
-
-        // protection: never send zero to avoid setting rear drive condition
-        if (Math.abs(actuator) < 0.2) actuator = 0.2;
+        if (actuator > this.config.maxThrottle) actuator = this.config.maxThrottle;
+        if (actuator < this.config.minThrottle) actuator = this.config.minThrottle;
 
         return actuator;
+    }
+}
+
+class ThrottleReverseProtect {
+    constructor() {
+        this.lastValue = 0;
+    }
+
+    isZero(value) {
+        return Math.abs(value) < 0.2;
+    }
+    compute(value) {
+        if (value < 0 && this.isZero(this.lastValue)) value = 0;
+    
+        this.lastValue = value;
+
+        return value;
     }
 }
 
@@ -103,4 +120,4 @@ class ThrottlePipeline {
     }
 }
 
-module.exports = { ThrottleRewrite, ThrottleObstacle, ThrottlePIDSpeed, ThrottlePipeline }
+module.exports = { ThrottleRewrite, ThrottleObstacle, ThrottlePIDSpeed, ThrottleReverseProtect, ThrottlePipeline }
