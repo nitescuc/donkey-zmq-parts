@@ -13,8 +13,8 @@ throttle:
     medium: 480
     fast: 480
   pid:
-    k_p: 1.0
-    k_i: 0.1
+    k_p: 0.02
+    k_i: 0.001
     k_d: 0.001
 configServer:
   emitter: tcp://10.42.0.1:5556
