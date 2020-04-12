@@ -48,11 +48,14 @@ class ThrottlePIDSpeed {
         this.config.maxThrottle = this.config.maxThrottle || 1;
         this.config.minThrottle = this.config.minThrottle || -1;
         this.controller = new Controller(this.config.pid);
-        this.setSensorValue(10000);
+        this.setSensorValue(0);
     }
 
     setPid(value) {
+        console.log('Received pid settings', value);
         this.config.pid = Object.assign(this.config.pid, value);
+        this.controller = new Controller(this.config.pid);
+        this.setSensorValue(this.sensorValue);
     }
     setMinThrottle(value) {
         this.config.minThrottle = value;
