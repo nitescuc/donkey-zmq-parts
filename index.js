@@ -187,9 +187,10 @@ actuatorServer.bind(config.get('actuator.server_port'));
 const rpmReader = new RpmReader({
     pin: RPM_DATA_PIN,
     powerPin: RPM_POWER_PIN,
+    remapValues: [1000, 0],
+    useKalman: true,
     callback: (channel, value) => {
         rpm = value;
-        //actuatorThrottle.setSensorValue(rpm);
         throttlePID.setSensorValue(rpm);
     }
 });

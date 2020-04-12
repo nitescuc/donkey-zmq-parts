@@ -62,24 +62,26 @@ class ThrottlePIDSpeed {
     }
 
     setSensorValue(value) {
-        if (value > 10000) value = 10000;
-        if (this.config.sensorMode === 'invert') {
-            value = 10000/value;
-        }
+//        if (value > 10000) value = 10000;
+//        if (this.config.sensorMode === 'invert') {
+//            value = 10000/value;
+//        }
 
         // filter some spikes
-        if (value > 3 * this.sensorValue) value = 3 * this.sensorValue;
+//        if (value > 3 * this.sensorValue) value = 3 * this.sensorValue;
 
         this.sensorValue = value;
     }
     compute(value) {
-        if (value >= 10000) return -1;
+//        if (value >= 10000) return -1;
         
-        this.controller.setTarget(10000/value);
+        this.controller.setTarget(value);
         let actuator = this.controller.update(this.sensorValue);
 
         if (actuator > this.config.maxThrottle) actuator = this.config.maxThrottle;
         if (actuator < this.config.minThrottle) actuator = this.config.minThrottle;
+
+        console.log(value, this.sensorValue, actuator);
 
         return actuator;
     }

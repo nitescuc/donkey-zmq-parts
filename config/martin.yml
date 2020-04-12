@@ -9,11 +9,11 @@ throttle:
 #    slow: 4500
 #    medium: 3500
 #    fast: 2000
-    slow: 4800
-    medium: 4800
-    fast: 4800
+    slow: 480
+    medium: 480
+    fast: 480
   pid:
-    k_p: 1
+    k_p: 1.0
     k_i: 0.1
     k_d: 0.001
 configServer:
