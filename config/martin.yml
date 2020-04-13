@@ -1,21 +1,18 @@
 actuator:
   emitter: tcp://10.42.0.1:5555
-  max_pulse: 1630
+  max_pulse: 1680
   min_pulse: 1000
   trim: -50
 throttle:
   sensor_mode: 'invert'
   sensor_targets:
-#    slow: 4500
-#    medium: 3500
-#    fast: 2000
     slow: 480
-    medium: 480
-    fast: 480
+    medium: 650
+    fast: 800
   pid:
-    k_p: 0.02
-    k_i: 0.001
-    k_d: 0.001
+    k_p: 0.003
+    k_i: 0.00005
+    k_d: 0.00001
 configServer:
   emitter: tcp://10.42.0.1:5556
   mqtt: mqtt://10.42.0.1:1883
