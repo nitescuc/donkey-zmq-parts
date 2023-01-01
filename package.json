@@ -21,7 +21,7 @@
     "@nitescuc/rccar-actuator": "git+https://github.com/nitescuc/rccar-actuator.git",
     "@nitescuc/rccar-sonar": "git+https://github.com/nitescuc/rccar-sonar.git",
     "@nitescuc/rccar-remote-reader": "git+https://github.com/nitescuc/rccar-remote-reader.git",
-    "config": "^3.1.0",
+    "config": "^3.3.8",
     "js-yaml": "^3.13.1",
     "mqtt": "^3.0.0",
     "pigpio": "^1.2.2"
